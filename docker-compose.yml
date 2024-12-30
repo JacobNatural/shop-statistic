@@ -14,21 +14,6 @@
       networks:
         - spring-shop-network
 
-    mysql-test:
-      image: mysql:latest
-      volumes:
-        - mysql-test:/var/lib/mysql
-      environment:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: db_1
-        MYSQL_USER: user
-        MYSQL_PASSWORD: user1234
-        MYSQL_TCP_PORT: 3308
-      ports:
-        - '3308:3308'
-      networks:
-        - spring-shop-network
-
     webapp:
       image: jakubmarjankowski/shop-statistic:1.0
       build:
