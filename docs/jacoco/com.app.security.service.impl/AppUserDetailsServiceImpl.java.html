@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppUserDetailsServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.security.service.impl</a> &gt; <span class="el_source">AppUserDetailsServiceImpl.java</span></div><h1>AppUserDetailsServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.security.service.impl;
+
+import com.app.persistence.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * Implementation of the {@link UserDetailsService} interface for loading user details.
+ * &lt;p&gt;
+ * This service is used to retrieve user details from the database by username and return a Spring Security
+ * {@link User} object containing the user's credentials and authorities. The service is responsible for
+ * converting the retrieved user entity into a format suitable for Spring Security's authentication mechanism.
+ * &lt;/p&gt;
+ */
+@Service
+@RequiredArgsConstructor
+public class AppUserDetailsServiceImpl implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    /**
+     * Loads user details by the username.
+     * &lt;p&gt;
+     * This method retrieves a user by username from the database using the {@link UserRepository},
+     * then converts the user entity into a Spring Security {@link User} object with the required
+     * information like username, password, enabled status, and roles.
+     * If the user is not found, it throws an {@link EntityNotFoundException}.
+     * &lt;/p&gt;
+     *
+     * @param username the username of the user to be loaded
+     * @return the {@link UserDetails} object containing the user's credentials and authorities
+     * @throws UsernameNotFoundException if the user with the given username is not found
+     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+<span class="fc" id="L44">        return userRepository</span>
+<span class="fc" id="L45">                .findByUsername(username)</span>
+<span class="fc" id="L46">                .map(userFromDb -&gt; {</span>
+<span class="fc" id="L47">                    var userDetails = userFromDb.toUserDetailsDto();</span>
+<span class="fc" id="L48">                    return new User(</span>
+<span class="fc" id="L49">                            userDetails.username(),</span>
+<span class="fc" id="L50">                            userDetails.password(),</span>
+<span class="fc" id="L51">                            userDetails.enable(), true, true, true,</span>
+<span class="fc" id="L52">                            List.of(new SimpleGrantedAuthority(userDetails.role())));</span>
+                })
+<span class="fc" id="L54">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

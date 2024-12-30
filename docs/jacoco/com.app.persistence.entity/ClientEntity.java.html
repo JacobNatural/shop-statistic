@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.persistence.entity</a> &gt; <span class="el_source">ClientEntity.java</span></div><h1>ClientEntity.java</h1><pre class="source lang-java linenums">package com.app.persistence.entity;
+
+import com.app.model.Client;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Entity representing a client in the database.
+ * &lt;p&gt;
+ * This class is a JPA entity mapped to the `clients` table in the database. It contains
+ * information about a client, including their name, surname, age, cash balance, and the
+ * associated orders placed by the client. The class also provides a method to convert
+ * the entity into a {@link Client} model object.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * The entity is mapped to the `clients` table, with a unique constraint ensuring that
+ * the combination of name and surname is unique for each client.
+ * &lt;/p&gt;
+ */
+@ToString(exclude = &quot;orders&quot;, callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = &quot;orders&quot;)
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@SuperBuilder
+@Entity
+@Table(name = &quot;clients&quot;,
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {&quot;name&quot;, &quot;surname&quot;})
+        }
+)
+public class ClientEntity extends BaseEntity {
+
+    /**
+     * The first name of the client.
+     * &lt;p&gt;
+     * This field stores the name of the client and is part of the unique constraint
+     * along with the surname.
+     * &lt;/p&gt;
+     */
+    private String name;
+
+    /**
+     * The surname of the client.
+     * &lt;p&gt;
+     * This field stores the surname of the client and is part of the unique constraint
+     * along with the name.
+     * &lt;/p&gt;
+     */
+    private String surname;
+
+    /**
+     * The age of the client.
+     * &lt;p&gt;
+     * This field stores the client's age, which is an integer value.
+     * &lt;/p&gt;
+     */
+    @Column(name = &quot;age&quot;)
+    private int age;
+
+    /**
+     * The cash balance of the client.
+     * &lt;p&gt;
+     * This field stores the amount of cash available for the client. It uses
+     * {@link BigDecimal} to represent monetary values with high precision.
+     * &lt;/p&gt;
+     */
+    private BigDecimal cash;
+
+    /**
+     * The list of orders associated with the client.
+     * &lt;p&gt;
+     * This field defines a one-to-many relationship with the {@link OrderEntity}.
+     * Each client can have multiple orders. The cascade operation of `REMOVE` ensures
+     * that if a client is deleted, all associated orders are also removed.
+     * &lt;/p&gt;
+     */
+    @OneToMany(mappedBy = &quot;clientEntity&quot;, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    List&lt;OrderEntity&gt; orders = new ArrayList&lt;&gt;();
+
+    /**
+     * Converts the `ClientEntity` to a {@link Client} model object.
+     * &lt;p&gt;
+     * This method creates a new {@link Client} instance using the data from the
+     * current `ClientEntity` object.
+     * &lt;/p&gt;
+     *
+     * @return A new instance of {@link Client} with the entity's data.
+     */
+    public Client toClient() {
+<span class="fc" id="L99">        return new Client(id, name, surname, age, cash);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

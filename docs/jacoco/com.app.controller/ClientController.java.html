@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller</a> &gt; <span class="el_source">ClientController.java</span></div><h1>ClientController.java</h1><pre class="source lang-java linenums">package com.app.controller;
+
+import com.app.controller.dto.ClientDto;
+import com.app.controller.dto.ResponseDto;
+import com.app.converter.many.ClientsConverter;
+import com.app.service.ClientService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * Controller that manages client-related operations such as adding, retrieving, and removing clients.
+ * &lt;p&gt;
+ * This class handles HTTP requests related to clients, using the {@link ClientService} and {@link ClientsConverter}
+ * to process client data. It exposes endpoints to add single or multiple clients, find clients by ID, and delete clients.
+ * &lt;/p&gt;
+ */
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(&quot;/clients&quot;)
+public class ClientController {
+
+    /**
+     * Service responsible for client-related business logic.
+     */
+    private final ClientService clientService;
+
+    /**
+     * Converter used to convert clients between entities and DTOs.
+     */
+    private final ClientsConverter clientsConverter;
+
+    /**
+     * Endpoint to add a single client.
+     * &lt;p&gt;
+     * Accepts a {@link ClientDto} in the request body and returns the ID of the newly created client.
+     * &lt;/p&gt;
+     *
+     * @param clientDto the data of the client to be added.
+     * @return a {@link ResponseDto} containing the ID of the added client.
+     */
+    @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            description = &quot;Access only for ADMIN and LEADER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;Long&gt; addClient(@RequestBody ClientDto clientDto) {
+<span class="fc" id="L53">        return new ResponseDto&lt;&gt;(clientService.addClient(clientDto));</span>
+    }
+
+    /**
+     * Endpoint to add multiple clients.
+     * &lt;p&gt;
+     * Accepts a list of {@link ClientDto}s in the request body and returns a list of IDs of the newly created clients.
+     * &lt;/p&gt;
+     *
+     * @param clientsDto the list of clients to be added.
+     * @return a {@link ResponseDto} containing the list of IDs of the added clients.
+     */
+    @PostMapping(&quot;/all&quot;)
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            description = &quot;Access only for ADMIN and LEADER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;Long&gt;&gt; addClients(@RequestBody List&lt;ClientDto&gt; clientsDto) {
+<span class="fc" id="L72">        return new ResponseDto&lt;&gt;(clientService.addClients(clientsDto));</span>
+    }
+
+    /**
+     * Endpoint to retrieve a client by ID.
+     * &lt;p&gt;
+     * Returns a {@link ResponseDto} containing the client's data as a {@link ClientDto}.
+     * &lt;/p&gt;
+     *
+     * @param id the ID of the client to be retrieved.
+     * @return a {@link ResponseDto} containing the client data.
+     */
+    @GetMapping(&quot;/{id}&quot;)
+    @ResponseStatus(HttpStatus.FOUND)
+    @Operation(
+            description = &quot;Access only for ADMIN and LEADER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;ClientDto&gt; findById(@PathVariable Long id) {
+<span class="fc" id="L91">        return new ResponseDto&lt;&gt;(clientService.findById(id).toClientDto());</span>
+    }
+
+    /**
+     * Endpoint to retrieve clients by a list of IDs.
+     * &lt;p&gt;
+     * Returns a list of {@link ClientDto} for the clients with the specified IDs.
+     * &lt;/p&gt;
+     *
+     * @param ids the list of client IDs to be retrieved.
+     * @return a {@link ResponseDto} containing a list of client data.
+     */
+    @GetMapping()
+    @ResponseStatus(HttpStatus.FOUND)
+    @Operation(
+            description = &quot;Access only for ADMIN and LEADER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;ClientDto&gt;&gt; findAllByIds(@RequestParam List&lt;Long&gt; ids) {
+<span class="fc" id="L110">        return new ResponseDto&lt;&gt;(clientsConverter.toDtoList(clientService.findAllByIds(ids)));</span>
+    }
+
+    /**
+     * Endpoint to remove a client by ID.
+     * &lt;p&gt;
+     * Removes the client with the specified ID and returns the ID of the removed client.
+     * &lt;/p&gt;
+     *
+     * @param id the ID of the client to be removed.
+     * @return a {@link ResponseDto} containing the ID of the removed client.
+     */
+    @DeleteMapping(&quot;/{id}&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN and LEADER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;Long&gt; removeById(@PathVariable Long id) {
+<span class="fc" id="L129">        return new ResponseDto&lt;&gt;(clientService.removeElement(id));</span>
+    }
+
+    /**
+     * Endpoint to remove multiple clients by IDs.
+     * &lt;p&gt;
+     * Accepts a list of client IDs to remove and returns a list of IDs of the removed clients.
+     * &lt;/p&gt;
+     *
+     * @param ids the list of client IDs to be removed.
+     * @return a {@link ResponseDto} containing a list of IDs of the removed clients.
+     */
+    @DeleteMapping()
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN and LEADER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;Long&gt;&gt; removeAllByIds(@RequestParam List&lt;Long&gt; ids) {
+<span class="fc" id="L148">        return new ResponseDto&lt;&gt;(clientService.removeAllByIds(ids));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserDetailsDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.security.dto</a> &gt; <span class="el_source">UserDetailsDto.java</span></div><h1>UserDetailsDto.java</h1><pre class="source lang-java linenums">package com.app.security.dto;
+
+/**
+ * Data Transfer Object (DTO) used to represent the details of a user.
+ * &lt;p&gt;
+ * This class encapsulates the information related to a user's authentication and authorization:
+ * &lt;ul&gt;
+ *   &lt;li&gt;&lt;strong&gt;username&lt;/strong&gt; - The unique username of the user.&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;password&lt;/strong&gt; - The password of the user (in its encoded form).&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;enable&lt;/strong&gt; - A boolean indicating if the user account is enabled or not.&lt;/li&gt;
+ *   &lt;li&gt;&lt;strong&gt;role&lt;/strong&gt; - The role assigned to the user (e.g., &quot;USER&quot;, &quot;ADMIN&quot;, etc.).&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ *
+ * @param username the unique username of the user
+ * @param password the password (encoded) of the user
+ * @param enable   indicates if the user's account is enabled
+ * @param role     the role of the user, used for authorization
+ */
+<span class="fc" id="L20">public record UserDetailsDto(String username, String password, boolean enable, String role) {</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.persistence.entity</a> &gt; <span class="el_source">ProductEntity.java</span></div><h1>ProductEntity.java</h1><pre class="source lang-java linenums">package com.app.persistence.entity;
+
+import com.app.model.Product;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Entity representing a product in the database.
+ * &lt;p&gt;
+ * This class is a JPA entity mapped to the `products` table in the database. It represents
+ * a product that can be ordered by clients. The class provides a method to convert the
+ * entity into a {@link Product} model object.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * The entity is mapped to the `products` table, and each product has a unique combination
+ * of name and category. It is also associated with a list of orders that reference this
+ * product.
+ * &lt;/p&gt;
+ */
+@ToString(exclude = &quot;orders&quot;)
+@EqualsAndHashCode(callSuper = true)
+@Setter
+@Getter
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = &quot;products&quot;,
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {&quot;name&quot;, &quot;category&quot;})
+        }
+)
+public class ProductEntity extends BaseEntity {
+
+    /**
+     * The name of the product.
+     * &lt;p&gt;
+     * This field stores the name of the product, which must be unique within a given category.
+     * &lt;/p&gt;
+     */
+    private String name;
+
+    /**
+     * The category of the product.
+     * &lt;p&gt;
+     * This field stores the category under which the product falls. The combination of
+     * `name` and `category` must be unique in the database.
+     * &lt;/p&gt;
+     */
+    private String category;
+
+    /**
+     * The price of the product.
+     * &lt;p&gt;
+     * This field stores the price of the product. The price is represented using a
+     * {@link BigDecimal} to ensure accurate representation of decimal values.
+     * &lt;/p&gt;
+     */
+    private BigDecimal price;
+
+    /**
+     * The list of orders that contain this product.
+     * &lt;p&gt;
+     * This field establishes a one-to-many relationship with the `OrderEntity` class.
+     * Multiple orders can reference the same product. The `REMOVE` cascade ensures that
+     * orders are removed if the associated product is deleted. The `orphanRemoval` ensures
+     * that orders without products are removed.
+     * &lt;/p&gt;
+     */
+    @OneToMany(mappedBy = &quot;productEntity&quot;, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    List&lt;OrderEntity&gt; orders = new ArrayList&lt;&gt;();
+
+    /**
+     * Converts the `ProductEntity` to a {@link Product} model object.
+     * &lt;p&gt;
+     * This method creates a new {@link Product} instance using the data from the
+     * current `ProductEntity` object.
+     * &lt;/p&gt;
+     *
+     * @return A new instance of {@link Product} with the entity's data.
+     */
+    public Product toProduct() {
+<span class="fc" id="L90">        return new Product(id, name, category, price);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

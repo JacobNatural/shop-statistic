@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl.crud</a> &gt; <span class="el_source">OrderServiceImpl.java</span></div><h1>OrderServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl.crud;
+
+import com.app.controller.dto.order.OrderAddDto;
+import com.app.controller.dto.order.OrdersAddDto;
+import com.app.converter.single.Converter;
+import com.app.model.Order;
+import com.app.persistence.entity.OrderEntity;
+import com.app.persistence.repository.ClientRepository;
+import com.app.persistence.repository.CrudRepository;
+import com.app.persistence.repository.OrderRepository;
+import com.app.persistence.repository.ProductRepository;
+import com.app.service.OrderService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Implementation of the {@link OrderService} interface that provides CRUD operations for managing orders.
+ * This service class interacts with repositories for clients, products, and orders, and performs
+ * necessary validations before saving orders.
+ * &lt;p&gt;
+ * The service methods ensure that clients and products are validated before an order is created.
+ * &lt;/p&gt;
+ */
+@Transactional
+@Service
+public class OrderServiceImpl extends GenericServiceImpl&lt;OrderEntity, Order&gt; implements OrderService {
+
+    private final ClientRepository clientRepository;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+
+    /**
+     * Constructor that initializes the {@link OrderServiceImpl} with necessary repositories and a converter.
+     *
+     * @param repository        the repository for {@link OrderEntity} used by the generic service
+     * @param converter         the converter used to convert between {@link OrderEntity} and {@link Order}
+     * @param clientRepository  the repository for {@link com.app.persistence.entity.ClientEntity} used for client lookup
+     * @param orderRepository   the repository for {@link OrderEntity} used for order persistence
+     * @param productRepository the repository for {@link com.app.persistence.entity.ProductEntity} used for product lookup
+     */
+    public OrderServiceImpl(
+            CrudRepository&lt;OrderEntity&gt; repository,
+            Converter&lt;OrderEntity, Order&gt; converter,
+            ClientRepository clientRepository,
+            OrderRepository orderRepository,
+            ProductRepository productRepository) {
+<span class="fc" id="L50">        super(repository, converter);</span>
+<span class="fc" id="L51">        this.clientRepository = clientRepository;</span>
+<span class="fc" id="L52">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L53">        this.productRepository = productRepository;</span>
+<span class="fc" id="L54">    }</span>
+
+    /**
+     * Adds a single order based on the provided {@link OrderAddDto}.
+     * &lt;p&gt;
+     * This method validates that the client and product exist, then creates and saves an order entity.
+     * &lt;/p&gt;
+     *
+     * @param orderAddDto the DTO containing information about the order to be added
+     * @return the ID of the created order
+     * @throws EntityNotFoundException if the client or product specified in the DTO is not found
+     */
+    public Long addOrder(OrderAddDto orderAddDto) {
+<span class="fc" id="L67">        var clientEntity = clientRepository.findById(orderAddDto.clientId())</span>
+<span class="fc" id="L68">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Client not found&quot;));</span>
+<span class="fc" id="L69">        var productEntity = productRepository.findById(orderAddDto.productId())</span>
+<span class="fc" id="L70">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Product not found&quot;));</span>
+
+<span class="fc" id="L72">        return orderRepository.save(OrderEntity</span>
+<span class="fc" id="L73">                .builder()</span>
+<span class="fc" id="L74">                .clientEntity(clientEntity)</span>
+<span class="fc" id="L75">                .productEntity(productEntity)</span>
+<span class="fc" id="L76">                .build()).getId();</span>
+    }
+
+    /**
+     * Adds multiple orders based on the provided {@link OrdersAddDto}.
+     * &lt;p&gt;
+     * This method validates that the client exists and that all products specified in the DTO are found in the database.
+     * If any product is not found, an {@link EntityNotFoundException} is thrown.
+     * &lt;/p&gt;
+     *
+     * @param ordersAddDto the DTO containing information about multiple orders to be added
+     * @return a list of IDs of the created orders
+     * @throws EntityNotFoundException if the client or any of the products specified in the DTO are not found
+     */
+    public List&lt;Long&gt; addOrders(OrdersAddDto ordersAddDto) {
+
+<span class="fc" id="L92">        var clientEntity = clientRepository</span>
+<span class="fc" id="L93">                .findById(ordersAddDto.clientId())</span>
+<span class="fc" id="L94">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Client not found&quot;));</span>
+
+<span class="fc" id="L96">        var productsEntity = productRepository.findAllById(ordersAddDto.productsId());</span>
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (productsEntity.size() != ordersAddDto.productsId().size()) {</span>
+<span class="fc" id="L99">            throw new EntityNotFoundException(&quot;Not all products were found&quot;);</span>
+        }
+
+<span class="fc" id="L102">        return orderRepository.saveAll(ordersAddDto.orderEntityList(clientEntity, productsEntity))</span>
+<span class="fc" id="L103">                .stream()</span>
+<span class="fc" id="L104">                .map(OrderEntity::getId)</span>
+<span class="fc" id="L105">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

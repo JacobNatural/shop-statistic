@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdersConverterImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.converter.many.impl</a> &gt; <span class="el_source">OrdersConverterImpl.java</span></div><h1>OrdersConverterImpl.java</h1><pre class="source lang-java linenums">package com.app.converter.many.impl;
+
+import com.app.controller.dto.order.OrderFindDto;
+import com.app.converter.many.OrdersConverter;
+import com.app.model.Order;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+/**
+ * Implementation of the {@link OrdersConverter} interface for converting
+ * {@link Order} entities to {@link OrderFindDto} data transfer objects (DTOs).
+ *
+ * &lt;p&gt;This component is responsible for converting a list of {@link Order} objects
+ * into a list of {@link OrderFindDto} objects for use in API responses.&lt;/p&gt;
+ */
+@Component
+<span class="fc" id="L18">public class OrdersConverterImpl implements OrdersConverter {</span>
+
+    /**
+     * Converts a list of {@link Order} entities to a list of {@link OrderFindDto} objects.
+     *
+     * @param orders the list of {@link Order} entities to convert
+     * @return a list of {@link OrderFindDto} objects representing the orders
+     */
+    @Override
+    public List&lt;OrderFindDto&gt; toOrderFindDto(List&lt;Order&gt; orders) {
+<span class="fc" id="L28">        return orders</span>
+<span class="fc" id="L29">                .stream()</span>
+<span class="fc" id="L30">                .map(Order::toOrderFindDto)</span>
+<span class="fc" id="L31">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

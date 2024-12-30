@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller.dto.product</a> &gt; <span class="el_source">ProductDto.java</span></div><h1>ProductDto.java</h1><pre class="source lang-java linenums">package com.app.controller.dto.product;
+
+import com.app.persistence.entity.ProductEntity;
+
+import java.math.BigDecimal;
+
+/**
+ * A DTO representing a product with details such as name, category, and price.
+ * &lt;p&gt;
+ * This class is used to transfer product information, including the product's ID, name, category, and price.
+ * &lt;/p&gt;
+ */
+<span class="fc" id="L13">public record ProductDto(</span>
+        /**
+         * The unique identifier of the product.
+         */
+        Long id,
+
+        /**
+         * The name of the product.
+         */
+        String name,
+
+        /**
+         * The category of the product.
+         */
+        String category,
+
+        /**
+         * The price of the product.
+         */
+        BigDecimal price) {
+
+    /**
+     * Converts this {@link ProductDto} into a {@link ProductEntity}.
+     * &lt;p&gt;
+     * This method creates a new {@link ProductEntity} instance using the name, category, and price from the DTO.
+     * &lt;/p&gt;
+     *
+     * @return a new {@link ProductEntity} with values from this DTO.
+     */
+    public ProductEntity toProductEntity() {
+<span class="fc" id="L43">        return ProductEntity</span>
+<span class="fc" id="L44">                .builder()</span>
+<span class="fc" id="L45">                .name(name)</span>
+<span class="fc" id="L46">                .category(category)</span>
+<span class="fc" id="L47">                .price(price)</span>
+<span class="fc" id="L48">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.persistence.entity</a> &gt; <span class="el_source">OrderEntity.java</span></div><h1>OrderEntity.java</h1><pre class="source lang-java linenums">package com.app.persistence.entity;
+
+import com.app.model.Order;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * Entity representing an order placed by a client in the database.
+ * &lt;p&gt;
+ * This class is a JPA entity mapped to the `orders` table in the database. It represents
+ * an order, which includes references to the client placing the order and the product
+ * being ordered. The class provides a method to convert the entity into a {@link Order}
+ * model object.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * The entity is mapped to the `orders` table, with relationships to the `ClientEntity`
+ * and `ProductEntity` classes, establishing a many-to-one relationship for both fields.
+ * &lt;/p&gt;
+ */
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+@Entity
+@Table(name = &quot;orders&quot;)
+public class OrderEntity extends BaseEntity {
+
+    /**
+     * The client who placed the order.
+     * &lt;p&gt;
+     * This field establishes a many-to-one relationship with the {@link ClientEntity}.
+     * Each order is associated with one client. The `MERGE` cascade ensures that any
+     * changes made to the client entity are synchronized with the order entity.
+     * &lt;/p&gt;
+     */
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = &quot;client_id&quot;)
+    private ClientEntity clientEntity;
+
+    /**
+     * The product being ordered.
+     * &lt;p&gt;
+     * This field establishes a many-to-one relationship with the {@link ProductEntity}.
+     * Each order is associated with one product. The `MERGE` and `PERSIST` cascades
+     * ensure that changes to the product or new product entities are propagated to
+     * the order entity.
+     * &lt;/p&gt;
+     */
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = &quot;product_id&quot;)
+    private ProductEntity productEntity;
+
+    /**
+     * Converts the `OrderEntity` to a {@link Order} model object.
+     * &lt;p&gt;
+     * This method creates a new {@link Order} instance using the data from the
+     * current `OrderEntity` object, including the associated client and product.
+     * &lt;/p&gt;
+     *
+     * @return A new instance of {@link Order} with the entity's data.
+     */
+    public Order toOrder() {
+<span class="fc" id="L68">        return new Order(id, clientEntity.toClient(), productEntity.toProduct());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

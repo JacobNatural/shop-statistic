@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderConverterImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.converter.single.impl</a> &gt; <span class="el_source">OrderConverterImpl.java</span></div><h1>OrderConverterImpl.java</h1><pre class="source lang-java linenums">package com.app.converter.single.impl;
+
+import com.app.converter.single.Converter;
+import com.app.model.Order;
+import com.app.persistence.entity.OrderEntity;
+import org.springframework.stereotype.Component;
+
+/**
+ * Implementation of the {@link Converter} interface for converting between {@link OrderEntity}
+ * and {@link Order} objects.
+ * &lt;p&gt;
+ * This class provides the conversion logic for transforming an {@link OrderEntity} (representing a
+ * database entity) to an {@link Order} (a business model) and vice versa.
+ * &lt;/p&gt;
+ */
+@Component
+<span class="fc" id="L17">public class OrderConverterImpl implements Converter&lt;OrderEntity, Order&gt; {</span>
+
+    /**
+     * Converts an {@link OrderEntity} to an {@link Order} model object.
+     *
+     * @param orderEntity the {@link OrderEntity} object to convert
+     * @return the corresponding {@link Order} model
+     */
+    @Override
+    public Order toModel(OrderEntity orderEntity) {
+<span class="fc" id="L27">        return orderEntity.toOrder();</span>
+    }
+
+    /**
+     * Converts an {@link Order} model object to an {@link OrderEntity}.
+     *
+     * @param order the {@link Order} model to convert
+     * @return the corresponding {@link OrderEntity} object
+     */
+    @Override
+    public OrderEntity toEntity(Order order) {
+<span class="fc" id="L38">        return order.toOrderEntity();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

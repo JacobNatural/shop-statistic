@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenericServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl.crud</a> &gt; <span class="el_source">GenericServiceImpl.java</span></div><h1>GenericServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl.crud;
+
+import com.app.converter.single.Converter;
+import com.app.persistence.repository.CrudRepository;
+import com.app.service.CrudService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
+/**
+ * A generic implementation of the {@link CrudService} interface providing basic CRUD operations
+ * for entities of type {@link T} and model type {@link U}.
+ * &lt;p&gt;
+ * This class provides common functionality for retrieving, deleting, and converting entities from the repository.
+ * Subclasses can extend this class to customize or extend the behavior for specific entity types.
+ * &lt;/p&gt;
+ *
+ * @param &lt;T&gt; the entity type, which corresponds to the persistence model (e.g., entity)
+ * @param &lt;U&gt; the model type, which corresponds to the service or DTO model (e.g., business model)
+ */
+@RequiredArgsConstructor
+public abstract class GenericServiceImpl&lt;T, U&gt; implements CrudService&lt;U&gt; {
+
+    /**
+     * The repository used for interacting with the data source (e.g., database).
+     */
+    protected final CrudRepository&lt;T&gt; repository;
+
+    /**
+     * The converter used to convert between entity {@link T} and model {@link U}.
+     */
+    protected final Converter&lt;T, U&gt; converter;
+
+    /**
+     * Finds an entity by its ID and converts it to the model type.
+     * &lt;p&gt;
+     * If the entity is not found, an {@link EntityNotFoundException} is thrown.
+     * &lt;/p&gt;
+     *
+     * @param id the ID of the entity to find
+     * @return the converted model {@link U}
+     * @throws EntityNotFoundException if the entity with the specified ID is not found
+     */
+    @Override
+    public U findById(Long id) {
+<span class="fc" id="L47">        return converter.toModel(repository</span>
+<span class="fc" id="L48">                .findById(id).orElseThrow(()</span>
+<span class="fc" id="L49">                        -&gt; new EntityNotFoundException(&quot;Element not found&quot;)));</span>
+    }
+
+    /**
+     * Finds entities by their IDs and converts them to the model type.
+     * &lt;p&gt;
+     * If some entities are not found, an {@link EntityNotFoundException} is thrown.
+     * &lt;/p&gt;
+     *
+     * @param ids the list of IDs of entities to find
+     * @return a list of converted models {@link U}
+     * @throws EntityNotFoundException if not all entities are found
+     */
+    @Override
+    public List&lt;U&gt; findAllByIds(List&lt;Long&gt; ids) {
+<span class="fc" id="L64">        var elements = repository.findAllById(ids)</span>
+<span class="fc" id="L65">                .stream()</span>
+<span class="fc" id="L66">                .map(converter::toModel)</span>
+<span class="fc" id="L67">                .toList();</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (elements.size() == ids.size()) {</span>
+<span class="fc" id="L70">            return elements;</span>
+        }
+<span class="fc" id="L72">        throw new EntityNotFoundException(&quot;Not all elements were found.&quot;);</span>
+    }
+
+    /**
+     * Removes an entity by its ID.
+     * &lt;p&gt;
+     * If the entity is found, it is deleted from the repository, and its ID is returned.
+     * &lt;/p&gt;
+     *
+     * @param id the ID of the entity to remove
+     * @return the ID of the removed entity
+     * @throws EntityNotFoundException if the entity with the specified ID is not found
+     */
+    @Override
+    public Long removeElement(Long id) {
+<span class="fc" id="L87">        var element = findById(id);</span>
+<span class="fc" id="L88">        repository.delete(converter.toEntity(element));</span>
+<span class="fc" id="L89">        return id;</span>
+    }
+
+    /**
+     * Removes multiple entities by their IDs.
+     * &lt;p&gt;
+     * Finds the entities corresponding to the provided IDs, deletes them from the repository, and returns the list of IDs.
+     * If any entity is not found, an {@link EntityNotFoundException} is thrown.
+     * &lt;/p&gt;
+     *
+     * @param ids the list of IDs of the entities to remove
+     * @return a list of IDs of the removed entities
+     * @throws EntityNotFoundException if not all entities are found
+     */
+    @Override
+    public List&lt;Long&gt; removeAllByIds(List&lt;Long&gt; ids) {
+<span class="fc" id="L105">        var elements = findAllByIds(ids);</span>
+
+<span class="fc" id="L107">        repository.deleteAll(elements.stream().map(converter::toEntity).toList());</span>
+<span class="fc" id="L108">        return ids;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

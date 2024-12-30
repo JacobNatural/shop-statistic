@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductSpecificationImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.persistence.repository.specification.impl</a> &gt; <span class="el_source">ProductSpecificationImpl.java</span></div><h1>ProductSpecificationImpl.java</h1><pre class="source lang-java linenums">package com.app.persistence.repository.specification.impl;
+
+import com.app.persistence.entity.ProductEntity;
+import com.app.persistence.repository.specification.ProductSpecification;
+import com.app.persistence.repository.specification.specification.ProductFilterSpecification;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
+
+/**
+ * Implementation of the {@link ProductSpecification} interface that provides methods for filtering
+ * {@link ProductEntity} objects based on specific criteria like category and price.
+ */
+@Component
+<span class="fc" id="L15">public class ProductSpecificationImpl implements ProductSpecification {</span>
+
+    /**
+     * Creates a dynamic filter specification for querying {@link ProductEntity} objects based on
+     * the provided {@link ProductFilterSpecification}.
+     *
+     * @param productFilterSpecification the filter criteria to be applied to the query
+     * @return a {@link Specification} representing the dynamic query filter
+     */
+    public Specification&lt;ProductEntity&gt; dynamicFilter(ProductFilterSpecification productFilterSpecification) {
+
+<span class="fc" id="L26">        return ((root, query, cb) -&gt; {</span>
+<span class="fc" id="L27">            Predicate p = cb.conjunction(); // Initialize the conjunction (AND condition)</span>
+
+            // Filter by category if the category is specified
+<span class="fc bfc" id="L30" title="All 4 branches covered.">            if (productFilterSpecification.category() != null &amp;&amp; !productFilterSpecification.category().isEmpty()) {</span>
+<span class="fc" id="L31">                p = cb.and(</span>
+                        p,
+<span class="fc" id="L33">                        cb.like(root.get(&quot;category&quot;), productFilterSpecification.category()));</span>
+            }
+
+            // Filter by minimum price if specified
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            if (productFilterSpecification.lowPrice() != null) {</span>
+<span class="fc" id="L38">                p = cb.and(</span>
+                        p,
+<span class="fc" id="L40">                        cb.greaterThanOrEqualTo(root.get(&quot;price&quot;), productFilterSpecification.lowPrice()));</span>
+            }
+
+            // Filter by maximum price if specified
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            if (productFilterSpecification.highPrice() != null) {</span>
+<span class="fc" id="L45">                p = cb.and(</span>
+                        p,
+<span class="fc" id="L47">                        cb.lessThanOrEqualTo(root.get(&quot;price&quot;), productFilterSpecification.highPrice()));</span>
+            }
+
+<span class="fc" id="L50">            return p; // Return the constructed predicate as the filter condition</span>
+        });
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

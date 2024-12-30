@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.statistic.impl</a> &gt; <span class="el_source">StatisticImpl.java</span></div><h1>StatisticImpl.java</h1><pre class="source lang-java linenums">package com.app.statistic.impl;
+
+import com.app.controller.dto.product.StatisticDto;
+import com.app.converter.many.ProductsConverter;
+import com.app.persistence.entity.view.PriceStatisticByCategoryProjection;
+import com.app.model.Product;
+import com.app.statistic.Statistic;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Implementation of the {@link Statistic} interface for storing and processing statistical data
+ * regarding products, such as the minimum, maximum, and average prices for a given category.
+ * This class is responsible for merging multiple statistics and converting them to DTO format for client-side consumption.
+ */
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
+public class StatisticImpl implements Statistic&lt;Product, BigDecimal&gt; {
+
+    /**
+     * The list of products with the minimum price in the given category.
+     */
+    @Getter
+    final List&lt;Product&gt; min;
+
+    /**
+     * The list of products with the maximum price in the given category.
+     */
+    @Getter
+    final List&lt;Product&gt; max;
+
+    /**
+     * The average price of products in the given category.
+     */
+    final BigDecimal avg;
+
+    /**
+     * Creates a new {@link StatisticImpl} instance from a {@link PriceStatisticByCategoryProjection} view projection.
+     * This method maps the statistics from the projection to the corresponding product data.
+     *
+     * @param priceStatisticByCategoryProjection the projection containing statistical data for a product category
+     * @return a new {@link StatisticImpl} object populated with data from the projection
+     */
+    public static Statistic&lt;Product, BigDecimal&gt; fromView(PriceStatisticByCategoryProjection priceStatisticByCategoryProjection) {
+<span class="fc" id="L52">        return new StatisticImpl(</span>
+<span class="fc" id="L53">                new ArrayList&lt;&gt;(List.of(new Product(</span>
+<span class="fc" id="L54">                        priceStatisticByCategoryProjection.getMinId(), priceStatisticByCategoryProjection.getMinName(),</span>
+<span class="fc" id="L55">                        priceStatisticByCategoryProjection.getCategory(), priceStatisticByCategoryProjection.getMinPrice()))),</span>
+<span class="fc" id="L56">                new ArrayList&lt;&gt;(List.of(new Product(</span>
+<span class="fc" id="L57">                        priceStatisticByCategoryProjection.getMaxId(), priceStatisticByCategoryProjection.getMaxName(),</span>
+<span class="fc" id="L58">                        priceStatisticByCategoryProjection.getCategory(), priceStatisticByCategoryProjection.getMaxPrice()))),</span>
+<span class="fc" id="L59">                priceStatisticByCategoryProjection.getAvgPrice());</span>
+    }
+
+    /**
+     * Merges the current statistics with another set of statistics, combining the minimum and maximum products from both sets.
+     *
+     * @param statistic the {@link Statistic} object to merge with
+     * @return the current {@link StatisticImpl} instance, with the merged data
+     */
+    public Statistic&lt;Product, BigDecimal&gt; merge(Statistic&lt;Product, BigDecimal&gt; statistic) {
+<span class="fc" id="L69">        min.addAll(statistic.getMin());</span>
+<span class="fc" id="L70">        max.addAll(statistic.getMax());</span>
+<span class="fc" id="L71">        return this;</span>
+    }
+
+    /**
+     * Converts the statistical data into a {@link StatisticDto} object for easier consumption on the client side.
+     *
+     * @param productsConverterImpl the converter used to transform product entities into DTOs
+     * @return a {@link StatisticDto} object containing the minimum, maximum, and average product data
+     */
+    public StatisticDto toStatisticDto(ProductsConverter productsConverterImpl) {
+<span class="fc" id="L81">        return new StatisticDto(</span>
+<span class="fc" id="L82">                productsConverterImpl.toDtoList(min),</span>
+<span class="fc" id="L83">                productsConverterImpl.toDtoList(max),</span>
+                avg
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

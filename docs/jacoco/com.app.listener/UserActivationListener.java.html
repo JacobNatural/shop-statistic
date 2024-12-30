@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserActivationListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.listener</a> &gt; <span class="el_source">UserActivationListener.java</span></div><h1>UserActivationListener.java</h1><pre class="source lang-java linenums">package com.app.listener;
+
+import com.app.controller.dto.user.UserActivationDto;
+import com.app.persistence.entity.VerificationTokenEntity;
+import com.app.persistence.repository.UserRepository;
+import com.app.persistence.repository.VerificationTokenRepository;
+import com.app.service.EmailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+
+import java.util.UUID;
+
+/**
+ * Listener class responsible for handling user activation events.
+ * &lt;p&gt;
+ * This class listens for user activation events and triggers the sending of an activation email to the user.
+ * The listener generates a unique verification token, saves it, and sends the email to the user with the token.
+ * &lt;/p&gt;
+ */
+@Component
+@RequiredArgsConstructor
+public class UserActivationListener {
+
+    private final UserRepository userRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final EmailService emailService;
+
+    /**
+     * The expiration time for the activation email in nanoseconds.
+     * &lt;p&gt;
+     * This value is read from the application's properties configuration file and determines how long the
+     * activation link remains valid after it is sent to the user.
+     * &lt;/p&gt;
+     */
+    @Value(&quot;${activation-mail-expiration-time}&quot;)
+    private Long activationMailExpireTime;
+
+    /**
+     * Listens to the user activation event and sends an activation email with a unique token to the user.
+     * &lt;p&gt;
+     * This method is executed asynchronously and ensures the activation email is only sent after the transaction
+     * has been successfully committed. It generates a verification token, stores it in the database, and sends an
+     * email with the token to the user.
+     * &lt;/p&gt;
+     *
+     * @param userActivationDto the data transfer object containing the user information for activation
+     * @throws IllegalArgumentException if the user is not found in the repository
+     */
+    @Async
+    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendActivationEmail(UserActivationDto userActivationDto) {
+        // Fetch the user to activate based on user ID
+<span class="fc" id="L62">        var userToActivation = userRepository</span>
+<span class="fc" id="L63">                .findById(userActivationDto.id())</span>
+<span class="fc" id="L64">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;User not found&quot;));</span>
+
+        // Generate a unique token for user activation
+<span class="fc" id="L67">        var token = UUID.randomUUID().toString().replaceAll(&quot;\\W&quot;, &quot;&quot;);</span>
+
+        // Set the expiration timestamp for the token
+<span class="fc" id="L70">        var timeStamps = System.nanoTime() + activationMailExpireTime;</span>
+
+        // Create a verification token entity and save it to the repository
+        var verificationTokenEntity = VerificationTokenEntity
+<span class="fc" id="L74">                .builder()</span>
+<span class="fc" id="L75">                .token(token)</span>
+<span class="fc" id="L76">                .timeStamp(timeStamps)</span>
+<span class="fc" id="L77">                .user(userToActivation)</span>
+<span class="fc" id="L78">                .build();</span>
+
+<span class="fc" id="L80">        verificationTokenRepository.save(verificationTokenEntity);</span>
+
+        // Send the activation email with the token to the user
+<span class="fc" id="L83">        emailService.send(</span>
+<span class="fc" id="L84">                userToActivation.getEmail(),</span>
+                &quot;Activation link&quot;,
+                &quot;Use this code to activate your account: &quot; + token
+        );
+<span class="fc" id="L88">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

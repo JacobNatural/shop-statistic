@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Role.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.model</a> &gt; <span class="el_source">Role.java</span></div><h1>Role.java</h1><pre class="source lang-java linenums">package com.app.model;
+
+/**
+ * Represents the different roles that a user can have in the application.
+ *  &lt;p&gt;
+ * This enum defines three roles that are associated with user permissions and access control:
+ * &lt;ul&gt;
+ *     &lt;li&gt;{@link #ROLE_WORKER} - A worker with limited access to the system's features.&lt;/li&gt;
+ *     &lt;li&gt;{@link #ROLE_LEADER} - A leader with more privileged access compared to a worker.&lt;/li&gt;
+ *     &lt;li&gt;{@link #ROLE_ADMIN} - An admin with the highest level of access and control over the system.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ */
+<span class="fc" id="L14">public enum Role {</span>
+
+    /**
+     * A worker role. Workers typically have limited access to certain parts of the system,
+     * focusing on specific tasks without administrative privileges.
+     */
+<span class="fc" id="L20">    ROLE_WORKER,</span>
+
+    /**
+     * A leader role. Leaders usually have higher access privileges compared to workers
+     * and can manage teams, but not the entire system.
+     */
+<span class="fc" id="L26">    ROLE_LEADER,</span>
+
+    /**
+     * An admin role. Admins have full access to all features of the system, including user management
+     * and system configurations.
+     */
+<span class="fc" id="L32">    ROLE_ADMIN</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

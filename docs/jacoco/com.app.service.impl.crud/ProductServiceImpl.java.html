@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl.crud</a> &gt; <span class="el_source">ProductServiceImpl.java</span></div><h1>ProductServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl.crud;
+
+import com.app.controller.dto.product.ProductDto;
+import com.app.controller.dto.product.ProductsFilterDto;
+import com.app.converter.single.Converter;
+import com.app.converter.many.ProductsConverter;
+import com.app.exception.ResourceAlreadyExistException;
+import com.app.model.Product;
+import com.app.persistence.entity.ProductEntity;
+import com.app.persistence.repository.CrudRepository;
+import com.app.persistence.repository.ProductRepository;
+import com.app.persistence.repository.specification.ProductSpecification;
+import com.app.service.ProductService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Implementation of the {@link ProductService} interface that provides CRUD operations for managing products.
+ * This service class interacts with the product repository, handles validation, and supports filtering and categorization
+ * of products.
+ * &lt;p&gt;
+ * The service methods ensure that products are not duplicated based on name and category, and support filtering
+ * based on the provided {@link ProductsFilterDto}.
+ * &lt;/p&gt;
+ */
+@Transactional
+@Service
+public class ProductServiceImpl extends GenericServiceImpl&lt;ProductEntity, Product&gt; implements ProductService {
+    private final ProductRepository productRepository;
+    private final ProductsConverter productsConverterImpl;
+    private final ProductSpecification productSpecification;
+
+    /**
+     * Constructor that initializes the {@link ProductServiceImpl} with necessary repositories, converters, and specifications.
+     *
+     * @param repository            the repository for {@link ProductEntity} used by the generic service
+     * @param converter             the converter used to convert between {@link ProductEntity} and {@link Product}
+     * @param productRepository     the repository for {@link ProductEntity} used for product persistence
+     * @param productsConverterImpl the converter used to convert a list of DTOs to entities
+     * @param productSpecification  the specification used for dynamic product filtering
+     */
+    public ProductServiceImpl(
+            CrudRepository&lt;ProductEntity&gt; repository,
+            Converter&lt;ProductEntity, Product&gt; converter,
+            ProductRepository productRepository,
+            ProductsConverter productsConverterImpl,
+            ProductSpecification productSpecification) {
+<span class="fc" id="L50">        super(repository, converter);</span>
+<span class="fc" id="L51">        this.productRepository = productRepository;</span>
+<span class="fc" id="L52">        this.productsConverterImpl = productsConverterImpl;</span>
+<span class="fc" id="L53">        this.productSpecification = productSpecification;</span>
+<span class="fc" id="L54">    }</span>
+
+    /**
+     * Adds a single product based on the provided {@link ProductDto}.
+     * &lt;p&gt;
+     * This method checks if a product with the same name and category already exists in the repository.
+     * If the product exists, it throws a {@link ResourceAlreadyExistException}.
+     * If the product does not exist, it saves the product entity and returns the generated ID.
+     * &lt;/p&gt;
+     *
+     * @param productDto the DTO containing information about the product to be added
+     * @return the ID of the created product
+     * @throws ResourceAlreadyExistException if a product with the same name and category already exists
+     */
+    public Long addProducts(ProductDto productDto) {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (productRepository.findByNameAndCategory(productDto.name(), productDto.category()).isPresent()) {</span>
+<span class="fc" id="L70">            throw new ResourceAlreadyExistException(&quot;Product already exists&quot;);</span>
+        }
+
+<span class="fc" id="L73">        return productRepository.save(productDto.toProductEntity()).getId();</span>
+    }
+
+    /**
+     * Adds multiple products based on the provided list of {@link ProductDto}.
+     * &lt;p&gt;
+     * This method checks each product in the list to ensure that no product with the same name and category
+     * already exists. If any product already exists, it throws a {@link ResourceAlreadyExistException}.
+     * After validation, it saves all products and returns the list of generated product IDs.
+     * &lt;/p&gt;
+     *
+     * @param productsDto the list of DTOs containing information about the products to be added
+     * @return a list of IDs of the created products
+     * @throws ResourceAlreadyExistException if any product with the same name and category already exists
+     */
+    public List&lt;Long&gt; addProducts(List&lt;ProductDto&gt; productsDto) {
+
+<span class="fc" id="L90">        productsDto.forEach(productDto -&gt; {</span>
+<span class="fc" id="L91">            if (productRepository.findByNameAndCategory(</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                    productDto.name(), productDto.category()).isPresent()) {</span>
+<span class="fc" id="L93">                throw new ResourceAlreadyExistException(&quot;Product: %s already exists&quot;.formatted(productDto));</span>
+            }
+<span class="fc" id="L95">        });</span>
+
+<span class="fc" id="L97">        return productRepository.saveAll(productsConverterImpl.toProductEntities(productsDto))</span>
+<span class="fc" id="L98">                .stream()</span>
+<span class="fc" id="L99">                .map(ProductEntity::getId)</span>
+<span class="fc" id="L100">                .toList();</span>
+    }
+
+    /**
+     * Retrieves a list of all product categories.
+     *
+     * @return a list of all categories available in the product repository
+     */
+    @Override
+    public List&lt;String&gt; getCategories() {
+<span class="fc" id="L110">        return productRepository.getAllCategories();</span>
+    }
+
+    /**
+     * Retrieves a list of products based on the specified category.
+     * &lt;p&gt;
+     * This method checks if the provided category is valid (not null or empty). If valid, it fetches
+     * the products belonging to that category and returns them as a list of {@link Product} objects.
+     * &lt;/p&gt;
+     *
+     * @param category the category of products to be retrieved
+     * @return a list of products that belong to the specified category
+     * @throws IllegalArgumentException if the category is null or empty
+     */
+    @Override
+    public List&lt;Product&gt; getProductsByCategory(String category) {
+
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (category == null) {</span>
+<span class="fc" id="L128">            throw new IllegalArgumentException(&quot;Category cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (category.isEmpty()) {</span>
+<span class="fc" id="L132">            throw new IllegalArgumentException(&quot;Category cannot be empty&quot;);</span>
+        }
+
+<span class="fc" id="L135">        return productsConverterImpl</span>
+<span class="fc" id="L136">                .toProduct(productRepository.findByCategory(category));</span>
+    }
+
+    /**
+     * Filters products based on the specified {@link ProductsFilterDto}.
+     * &lt;p&gt;
+     * This method utilizes a dynamic filtering mechanism via {@link ProductSpecification}. It applies
+     * the provided filter criteria and returns a list of products matching those criteria.
+     * &lt;/p&gt;
+     *
+     * @param productsFilterDto the DTO containing the filter criteria for the products
+     * @return a list of products that match the filter criteria
+     */
+    @Override
+    public List&lt;Product&gt; filterProducts(ProductsFilterDto productsFilterDto) {
+
+<span class="fc" id="L152">        return productRepository</span>
+<span class="fc" id="L153">                .findAll(productSpecification</span>
+<span class="fc" id="L154">                        .dynamicFilter(productsFilterDto.toProductFilterSpecification()))</span>
+<span class="fc" id="L155">                .stream()</span>
+<span class="fc" id="L156">                .map(ProductEntity::toProduct)</span>
+<span class="fc" id="L157">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

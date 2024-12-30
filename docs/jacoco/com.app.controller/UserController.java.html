@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.app.controller;
+
+import com.app.controller.dto.ResponseDto;
+import com.app.controller.dto.user.*;
+import com.app.security.dto.RefreshTokenDto;
+import com.app.security.dto.TokensDto;
+import com.app.security.service.TokenService;
+import com.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
+
+/**
+ * Controller for handling user-related operations such as registration, activation,
+ * login, password reset, email change, role change, and token management.
+ * &lt;p&gt;
+ * This class provides endpoints for managing users and authentication tasks like
+ * creating, activating, and refreshing users, as well as managing passwords and roles.
+ * &lt;/p&gt;
+ */
+@RestController
+@RequestMapping(&quot;/users&quot;)
+@RequiredArgsConstructor
+public class UserController {
+    private final UserService userService;
+    private final TokenService tokenService;
+
+    /**
+     * Creates a new user account.
+     * &lt;p&gt;
+     * This endpoint allows the creation of a new user by accepting the user's information.
+     * &lt;/p&gt;
+     *
+     * @param user the details of the user to be created.
+     * @return a {@link ResponseDto} containing the ID of the created user.
+     */
+    @PostMapping(&quot;/login&quot;)
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            description = &quot;Access for all users&quot;
+    )
+    public ResponseDto&lt;Long&gt; createUser(@RequestBody CreateUserDto user) {
+<span class="fc" id="L50">        return new ResponseDto&lt;&gt;(userService.createUser(user));</span>
+    }
+
+    /**
+     * Activates a user account using a token.
+     * &lt;p&gt;
+     * This endpoint activates a user by providing the activation token.
+     * &lt;/p&gt;
+     *
+     * @param userTokenActivationDto the activation token details for the user.
+     * @return a {@link ResponseDto} containing the ID of the activated user.
+     */
+    @PostMapping(&quot;/login/activate&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access for all users&quot;
+    )
+    public ResponseDto&lt;Long&gt; activateUser(@RequestBody UserTokenActivationDto userTokenActivationDto) {
+<span class="fc" id="L68">        return new ResponseDto&lt;&gt;(userService.activateUser(userTokenActivationDto));</span>
+    }
+
+    /**
+     * Refreshes the activation token for the user via email.
+     * &lt;p&gt;
+     * This endpoint sends a new activation token to the user's email for account activation.
+     * &lt;/p&gt;
+     *
+     * @param userTokenActivationDto the email details for refreshing the token.
+     * @return a {@link ResponseDto} containing the ID of the user whose token is refreshed.
+     */
+    @PostMapping(&quot;/login/mail/refresh&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access for all users&quot;
+    )
+    public ResponseDto&lt;Long&gt; refreshActivate(@RequestBody UserEmailRefreshToken userTokenActivationDto) {
+<span class="fc" id="L86">        return new ResponseDto&lt;&gt;(userService.refreshToken(userTokenActivationDto));</span>
+    }
+
+    /**
+     * Refreshes the user's access token.
+     * &lt;p&gt;
+     * This endpoint refreshes the user's session by accepting the refresh token and issuing
+     * a new pair of access and refresh tokens.
+     * &lt;/p&gt;
+     *
+     * @param refreshTokenDto the details of the refresh token.
+     * @return a {@link ResponseDto} containing the new {@link TokensDto} (access and refresh tokens).
+     */
+    @PostMapping(&quot;/login/refresh&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access for all users&quot;
+    )
+    public ResponseDto&lt;TokensDto&gt; refreshUser(@RequestBody RefreshTokenDto refreshTokenDto) {
+<span class="fc" id="L105">        return new ResponseDto&lt;&gt;(tokenService.refreshToken(refreshTokenDto));</span>
+    }
+
+    /**
+     * Initiates the password reset process by sending a reset link to the provided email.
+     * &lt;p&gt;
+     * This endpoint allows the user to request a password reset by providing their email.
+     * &lt;/p&gt;
+     *
+     * @param emailDto      the email address of the user who lost their password.
+     * @param bindingResult holds validation errors, if any.
+     * @return a {@link ResponseDto} containing the ID of the user requesting password reset.
+     * @throws IllegalArgumentException if validation errors are found.
+     */
+    @PostMapping(&quot;/login/lost&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access for all users&quot;
+    )
+    public ResponseDto&lt;Long&gt; lostPassword(@Valid @RequestBody EmailDto emailDto, BindingResult bindingResult) {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (bindingResult.hasErrors()) {</span>
+<span class="fc" id="L126">            throw new IllegalArgumentException(bindingResult</span>
+<span class="fc" id="L127">                    .getFieldErrors()</span>
+<span class="fc" id="L128">                    .stream()</span>
+<span class="fc" id="L129">                    .map(DefaultMessageSourceResolvable::getDefaultMessage)</span>
+<span class="fc" id="L130">                    .collect(Collectors.joining(&quot;\n&quot;)));</span>
+        }
+<span class="fc" id="L132">        return new ResponseDto&lt;&gt;(userService.lostPassword(emailDto));</span>
+    }
+
+    /**
+     * Allows the user to set a new password.
+     * &lt;p&gt;
+     * This endpoint allows the user to reset their password using the new password provided.
+     * &lt;/p&gt;
+     *
+     * @param newPasswordDto the new password details.
+     * @return a {@link ResponseDto} containing the ID of the user whose password has been changed.
+     */
+    @PatchMapping(&quot;/login/password&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access for all users&quot;
+    )
+    public ResponseDto&lt;Long&gt; newPassword(@RequestBody NewPasswordDto newPasswordDto) {
+<span class="fc" id="L150">        return new ResponseDto&lt;&gt;(userService.newPassword(newPasswordDto));</span>
+    }
+
+    /**
+     * Changes the user's email address.
+     * &lt;p&gt;
+     * This endpoint allows the user to change their email address after providing the new
+     * email and a valid authorization token.
+     * &lt;/p&gt;
+     *
+     * @param emailDto the new email details.
+     * @param token    the authorization token for the user.
+     * @return a {@link ResponseDto} containing the ID of the user whose email was changed.
+     */
+    @PatchMapping(&quot;/email&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;Long&gt; changeEmail(@RequestBody EmailDto emailDto,
+                                         @RequestHeader(name = &quot;Authorization&quot;) String token) {
+<span class="fc" id="L172">        return new ResponseDto&lt;&gt;(userService.changeEmail(emailDto, token));</span>
+    }
+
+    /**
+     * Changes the user's password.
+     * &lt;p&gt;
+     * This endpoint allows the user to change their password after providing the current and
+     * new password along with a valid authorization token.
+     * &lt;/p&gt;
+     *
+     * @param changePasswordDto the details of the current and new password.
+     * @param token             the authorization token for the user.
+     * @return a {@link ResponseDto} containing the ID of the user whose password was changed.
+     */
+    @PatchMapping(&quot;/password&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;Long&gt; changePassword(
+            @RequestBody ChangePasswordDto changePasswordDto,
+            @RequestHeader(name = &quot;Authorization&quot;) String token) {
+<span class="fc" id="L195">        return new ResponseDto&lt;&gt;(userService.changePassword(changePasswordDto, token));</span>
+    }
+
+    /**
+     * Changes the user's role.
+     * &lt;p&gt;
+     * This endpoint allows an administrator to change the role of a user.
+     * &lt;/p&gt;
+     *
+     * @param changeRoleDto the details of the role change request.
+     * @return a {@link ResponseDto} containing the ID of the user whose role was changed.
+     */
+    @PatchMapping(&quot;/role&quot;)
+    @Operation(
+            description = &quot;Access only for ADMIN using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseDto&lt;Long&gt; changeRole(
+            @RequestBody ChangeRoleDto changeRoleDto) {
+<span class="fc" id="L215">        return new ResponseDto&lt;&gt;(userService.changeRole(changeRoleDto));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

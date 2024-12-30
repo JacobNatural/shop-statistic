@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl;
+
+import com.app.controller.dto.user.*;
+import com.app.exception.InvalidCredentialsException;
+import com.app.exception.ResourceAlreadyExistException;
+import com.app.exception.UserAlreadyActivatedException;
+import com.app.persistence.entity.BaseEntity;
+import com.app.persistence.repository.UserRepository;
+import com.app.persistence.repository.VerificationTokenRepository;
+import com.app.security.service.TokenService;
+import com.app.service.UserService;
+import com.app.validator.Validator;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Implementation of the {@link UserService} interface. This class handles the user management functionality, including user creation,
+ * activation, password change, role change, email change, and token management.
+ */
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final PasswordEncoder passwordEncoder;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final Validator&lt;CreateUserDto&gt; createUserValidator;
+    private final Validator&lt;ChangePasswordDto&gt; changePasswordDtoValidator;
+    private final Validator&lt;NewPasswordDto&gt; newPasswordDtoValidator;
+    private final Validator&lt;EmailDto&gt; emailDtoValidator;
+    private final CreateAdminUserDto createAdminUserDto;
+    private final TokenService tokenService;
+
+    /**
+     * Initializes the service by checking if the default admin user already exists.
+     * If it does not exist, the default admin user is created.
+     */
+    @PostConstruct
+    public void init() {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (userRepository.findByUsername(createAdminUserDto.username()).isPresent()) {</span>
+<span class="fc" id="L48">            throw new ResourceAlreadyExistException(&quot;Username already exists&quot;);</span>
+        }
+
+<span class="fc" id="L51">        userRepository.save(createAdminUserDto.toUserEntity()</span>
+<span class="fc" id="L52">                .withPassword(passwordEncoder.encode(createAdminUserDto.password())));</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * Creates a new user.
+     *
+     * @param createUserDto the DTO containing the user creation data
+     * @return the ID of the created user
+     * @throws ResourceAlreadyExistException if the username or email already exists
+     */
+    @Override
+    public Long createUser(CreateUserDto createUserDto) {
+<span class="fc" id="L64">        Validator.validate(createUserDto, createUserValidator);</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (userRepository.findByUsername(createUserDto.username()).isPresent()) {</span>
+<span class="fc" id="L67">            throw new ResourceAlreadyExistException(&quot;Username already exists&quot;);</span>
+        }
+
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (userRepository.findByEmail(createUserDto.email()).isPresent()) {</span>
+<span class="fc" id="L71">            throw new ResourceAlreadyExistException(&quot;Email already exists&quot;);</span>
+        }
+
+<span class="fc" id="L74">        var id = userRepository</span>
+<span class="fc" id="L75">                .save(createUserDto.toCreateUserEntity()</span>
+<span class="fc" id="L76">                        .withPassword(passwordEncoder.encode(createUserDto.password())))</span>
+<span class="fc" id="L77">                .getId();</span>
+
+<span class="fc" id="L79">        eventPublisher.publishEvent(new UserActivationDto(id));</span>
+
+<span class="fc" id="L81">        return id;</span>
+    }
+
+    /**
+     * Activates a user based on the provided token.
+     *
+     * @param userTokenActivationDto the DTO containing the token for user activation
+     * @return the ID of the activated user
+     * @throws EntityNotFoundException if the token is not found or invalid
+     */
+    @Override
+    public Long activateUser(UserTokenActivationDto userTokenActivationDto) {
+<span class="fc" id="L93">        var token = verificationTokenRepository</span>
+<span class="fc" id="L94">                .findByToken(userTokenActivationDto.token())</span>
+<span class="fc" id="L95">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Token not found&quot;));</span>
+
+<span class="fc" id="L97">        var userEntity = token.validate();</span>
+
+<span class="fc" id="L99">        verificationTokenRepository.delete(token);</span>
+<span class="fc" id="L100">        userEntity.ifPresent(entity -&gt; userRepository.save(entity.toActivateUserEntity()));</span>
+
+<span class="fc" id="L102">        return userEntity.map(BaseEntity::getId).orElse(null);</span>
+    }
+
+    /**
+     * Refreshes the activation token for a user based on their email.
+     *
+     * @param userEmailRefreshToken the DTO containing the user's email
+     * @return the ID of the user whose token is being refreshed
+     * @throws EntityNotFoundException       if the user is not found
+     * @throws UserAlreadyActivatedException if the user is already activated
+     * @throws ResourceAlreadyExistException if a token already exists
+     */
+    @Override
+    public Long refreshToken(UserEmailRefreshToken userEmailRefreshToken) {
+<span class="fc" id="L116">        var userEntity = userRepository.findByEmail(userEmailRefreshToken.email())</span>
+<span class="fc" id="L117">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (userEntity.isActivate()) {</span>
+<span class="fc" id="L120">            throw new UserAlreadyActivatedException(&quot;User already activated&quot;);</span>
+        }
+
+<span class="fc" id="L123">        verificationTokenRepository</span>
+<span class="fc" id="L124">                .findByUserId(userEntity.getId()).ifPresent(token -&gt; {</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                    if (token.validate().isPresent()) {</span>
+<span class="fc" id="L126">                        throw new ResourceAlreadyExistException(&quot;Token already exists&quot;);</span>
+                    } else {
+<span class="fc" id="L128">                        verificationTokenRepository.delete(token);</span>
+                    }
+<span class="fc" id="L130">                });</span>
+
+<span class="fc" id="L132">        eventPublisher.publishEvent(new UserActivationDto(userEntity.getId()));</span>
+<span class="fc" id="L133">        return userEntity.getId();</span>
+    }
+
+    /**
+     * Changes the user's password.
+     *
+     * @param changePasswordDto the DTO containing the new password data
+     * @param token             the token used to identify the user
+     * @return the ID of the user whose password was changed
+     * @throws InvalidCredentialsException if the current password does not match
+     * @throws IllegalArgumentException    if the token is null
+     * @throws EntityNotFoundException     if the user is not found
+     */
+    @Override
+    public Long changePassword(ChangePasswordDto changePasswordDto, String token) {
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (token == null) {</span>
+<span class="fc" id="L149">            throw new IllegalArgumentException(&quot;Token cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L152">        Validator.validate(changePasswordDto, changePasswordDtoValidator);</span>
+
+<span class="fc" id="L154">        var id = tokenService.id(token.replace(&quot;Bearer &quot;, &quot;&quot;));</span>
+
+<span class="fc" id="L156">        var userEntity = userRepository.findById(id)</span>
+<span class="fc" id="L157">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (!passwordEncoder.matches(changePasswordDto.currentPassword(), userEntity.getPassword())) {</span>
+<span class="fc" id="L160">            throw new InvalidCredentialsException(&quot;Passwords do not match&quot;);</span>
+        }
+
+<span class="fc" id="L163">        return userRepository</span>
+<span class="fc" id="L164">                .save(userEntity.withPassword(passwordEncoder.encode(changePasswordDto.newPassword())))</span>
+<span class="fc" id="L165">                .getId();</span>
+    }
+
+    /**
+     * Changes the role of an existing user.
+     *
+     * @param changeRoleDto the DTO containing the user ID and the new role
+     * @return the ID of the user whose role was changed
+     * @throws EntityNotFoundException if the user is not found
+     */
+    @Override
+    public Long changeRole(ChangeRoleDto changeRoleDto) {
+<span class="fc" id="L177">        var userEntity = userRepository.findById(changeRoleDto.userId())</span>
+<span class="fc" id="L178">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+
+<span class="fc" id="L180">        return userRepository.save(userEntity.toNewRoleEntity(changeRoleDto.newRole()))</span>
+<span class="fc" id="L181">                .getId();</span>
+    }
+
+    /**
+     * Handles the case where a user has lost their password and requests a password reset.
+     *
+     * @param emailDto the DTO containing the user's email
+     * @return the ID of the user who requested a password reset
+     * @throws EntityNotFoundException if the email is not found
+     */
+    @Override
+    public Long lostPassword(EmailDto emailDto) {
+<span class="fc" id="L193">        var userEntity = userRepository.findByEmail(emailDto.email())</span>
+<span class="fc" id="L194">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Email not found&quot;));</span>
+
+<span class="fc" id="L196">        eventPublisher.publishEvent(new UserActivationDto(userEntity.getId()));</span>
+
+<span class="fc" id="L198">        return userEntity.getId();</span>
+    }
+
+    /**
+     * Sets a new password for a user based on the provided token.
+     *
+     * @param newPasswordDto the DTO containing the new password and token
+     * @return the ID of the user whose password was set
+     * @throws EntityNotFoundException if the token is not found or invalid
+     */
+    @Override
+    public Long newPassword(NewPasswordDto newPasswordDto) {
+<span class="fc" id="L210">        Validator.validate(newPasswordDto, newPasswordDtoValidator);</span>
+
+<span class="fc" id="L212">        var token = verificationTokenRepository.findByToken(newPasswordDto.token())</span>
+<span class="fc" id="L213">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Token not found&quot;));</span>
+
+<span class="fc" id="L215">        var userEntity = token.validate();</span>
+
+<span class="fc" id="L217">        verificationTokenRepository.delete(token);</span>
+
+<span class="fc" id="L219">        userEntity.ifPresent(ue -&gt; userRepository</span>
+<span class="fc" id="L220">                .save(ue.withPassword(passwordEncoder.encode(newPasswordDto.newPassword()))));</span>
+
+<span class="fc" id="L222">        return userEntity.map(BaseEntity::getId).orElse(null);</span>
+    }
+
+    /**
+     * Changes the email address of a user.
+     *
+     * @param emailDto the DTO containing the new email address
+     * @param token    the token used to identify the user
+     * @return the ID of the user whose email was changed
+     * @throws IllegalArgumentException if the token is null
+     * @throws EntityNotFoundException  if the user is not found
+     */
+    @Override
+    public Long changeEmail(EmailDto emailDto, String token) {
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (token == null) {</span>
+<span class="fc" id="L237">            throw new IllegalArgumentException(&quot;Token cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L240">        Validator.validate(emailDto, emailDtoValidator);</span>
+
+<span class="fc" id="L242">        var id = tokenService.id(token.replace(&quot;Bearer &quot;, &quot;&quot;));</span>
+
+<span class="fc" id="L244">        var userEntity = userRepository.findById(id)</span>
+<span class="fc" id="L245">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+
+<span class="fc" id="L247">        return userRepository.save(userEntity.toNewEmailEntity(emailDto.email())).getId();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

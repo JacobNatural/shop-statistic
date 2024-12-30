@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailDtoValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.validator.impl</a> &gt; <span class="el_source">EmailDtoValidator.java</span></div><h1>EmailDtoValidator.java</h1><pre class="source lang-java linenums">package com.app.validator.impl;
+
+import com.app.controller.dto.user.EmailDto;
+import com.app.validator.Validator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+/**
+ * Implementation of the {@link Validator} interface for validating {@link EmailDto} objects.
+ * This class ensures that the email provided in the {@link EmailDto} is not null and follows a valid format
+ * using a regular expression for email validation.
+ */
+@Component
+<span class="fc" id="L14">public class EmailDtoValidator implements Validator&lt;EmailDto&gt; {</span>
+
+    /**
+     * Regular expression for validating the email format.
+     */
+    @Value(&quot;${validate.user.email.regex}&quot;)
+    private String emailRegex;
+
+    /**
+     * Validates the provided {@link EmailDto} object by ensuring the email is not null and matches the
+     * required regular expression pattern.
+     *
+     * @param emailDto the {@link EmailDto} object to be validated
+     * @return a validation error message if the email is invalid; otherwise, an empty string
+     */
+    @Override
+    public String validate(EmailDto emailDto) {
+        // Check if the email is null or empty
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (Validator.stringNullCheck(emailDto.email())) {</span>
+<span class="fc" id="L33">            return &quot;E-mail cannot be null&quot;;</span>
+        }
+
+        // Check if the email matches the regex pattern
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (!Validator.stringRegexCheck(emailDto.email(), emailRegex)) {</span>
+<span class="fc" id="L38">            return &quot;E-mail does not match regex&quot;;</span>
+        }
+
+<span class="fc" id="L41">        return &quot;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

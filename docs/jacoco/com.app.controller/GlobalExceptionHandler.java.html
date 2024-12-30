@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.app.controller;
+
+import com.app.controller.dto.ResponseDto;
+import com.app.exception.InvalidCredentialsException;
+import com.app.exception.ResourceAlreadyExistException;
+import com.app.exception.UserAlreadyActivatedException;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+
+/**
+ * Global exception handler for managing exceptions thrown across the application.
+ * &lt;p&gt;
+ * This class is responsible for catching various exceptions and returning the appropriate HTTP response
+ * with a detailed error message. It uses {@link ResponseDto} to structure the response in a consistent way.
+ * &lt;/p&gt;
+ */
+@RestControllerAdvice
+<span class="fc" id="L22">public class GlobalExceptionHandler {</span>
+
+    /**
+     * Handles {@link IllegalArgumentException} and returns a 400 Bad Request status.
+     * &lt;p&gt;
+     * This method returns a {@link ResponseDto} containing the error message of the exception.
+     * &lt;/p&gt;
+     *
+     * @param e          the exception thrown.
+     * @param webRequest the request that caused the exception.
+     * @return a {@link ResponseDto} containing the exception message.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseDto&lt;String&gt; illegalArgumentException(IllegalArgumentException e, WebRequest webRequest) {
+<span class="fc" id="L37">        return new ResponseDto&lt;&gt;(e.getMessage());</span>
+    }
+
+    /**
+     * Handles {@link InvalidCredentialsException} and returns a 401 Unauthorized status.
+     * &lt;p&gt;
+     * This method returns a {@link ResponseDto} containing the error message of the exception.
+     * &lt;/p&gt;
+     *
+     * @param e          the exception thrown.
+     * @param webRequest the request that caused the exception.
+     * @return a {@link ResponseDto} containing the exception message.
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseDto&lt;String&gt; passwordNotMatch(Exception e, WebRequest webRequest) {
+<span class="fc" id="L53">        return new ResponseDto&lt;&gt;(e.getMessage());</span>
+    }
+
+    /**
+     * Handles {@link EntityNotFoundException} and returns a 404 Not Found status.
+     * &lt;p&gt;
+     * This method returns a {@link ResponseDto} containing the error message of the exception.
+     * &lt;/p&gt;
+     *
+     * @param e          the exception thrown.
+     * @param webRequest the request that caused the exception.
+     * @return a {@link ResponseDto} containing the exception message.
+     */
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseDto&lt;String&gt; entityNotFound(Exception e, WebRequest webRequest) {
+<span class="fc" id="L69">        return new ResponseDto&lt;&gt;(e.getMessage());</span>
+    }
+
+    /**
+     * Handles {@link UserAlreadyActivatedException} and {@link ResourceAlreadyExistException}
+     * and returns a 409 Conflict status.
+     * &lt;p&gt;
+     * This method returns a {@link ResponseDto} containing the error message of the exception.
+     * &lt;/p&gt;
+     *
+     * @param e          the exception thrown.
+     * @param webRequest the request that caused the exception.
+     * @return a {@link ResponseDto} containing the exception message.
+     */
+    @ExceptionHandler({UserAlreadyActivatedException.class, ResourceAlreadyExistException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseDto&lt;String&gt; userAlreadyActivated(Exception e, WebRequest webRequest) {
+<span class="fc" id="L86">        return new ResponseDto&lt;&gt;(e.getMessage());</span>
+    }
+
+    /**
+     * Handles any unexpected {@link Exception} and returns a 500 Internal Server Error status.
+     * &lt;p&gt;
+     * This method catches all unhandled exceptions and returns a {@link ResponseDto} with the exception message.
+     * &lt;/p&gt;
+     *
+     * @param e          the exception thrown.
+     * @param webRequest the request that caused the exception.
+     * @return a {@link ResponseDto} containing the exception message.
+     */
+    @ExceptionHandler({Exception.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseDto&lt;String&gt; handleUnexpectedExceptions(Exception e, WebRequest webRequest) {
+<span class="fc" id="L102">        return new ResponseDto&lt;&gt;(e.getMessage());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

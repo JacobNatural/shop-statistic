@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller</a> &gt; <span class="el_source">OrderController.java</span></div><h1>OrderController.java</h1><pre class="source lang-java linenums">package com.app.controller;
+
+import com.app.controller.dto.order.OrderAddDto;
+import com.app.controller.dto.order.OrderFindDto;
+import com.app.controller.dto.order.OrdersAddDto;
+import com.app.controller.dto.ResponseDto;
+import com.app.converter.many.OrdersConverter;
+import com.app.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * Controller for managing orders in the application.
+ * &lt;p&gt;
+ * This class provides endpoints for creating, retrieving, and deleting orders.
+ * &lt;/p&gt;
+ */
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(&quot;/orders&quot;)
+public class OrderController {
+
+    private final OrderService orderService;
+    private final OrdersConverter ordersConverter;
+
+    /**
+     * Creates a new order.
+     * &lt;p&gt;
+     * This method accepts an {@link OrderAddDto} object in the request body and creates a new order.
+     * It returns the ID of the newly created order wrapped in a {@link ResponseDto}.
+     * &lt;/p&gt;
+     *
+     * @param orderAddDto the order data to be added.
+     * @return a {@link ResponseDto} containing the ID of the created order.
+     */
+    @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;Long&gt; addOrder(@RequestBody OrderAddDto orderAddDto) {
+<span class="fc" id="L48">        return new ResponseDto&lt;&gt;(orderService</span>
+<span class="fc" id="L49">                .addOrder(orderAddDto));</span>
+    }
+
+    /**
+     * Creates multiple orders.
+     * &lt;p&gt;
+     * This method accepts a list of {@link OrdersAddDto} objects in the request body and creates multiple orders.
+     * It returns the IDs of the newly created orders wrapped in a {@link ResponseDto}.
+     * &lt;/p&gt;
+     *
+     * @param orderDto the list of orders data to be added.
+     * @return a {@link ResponseDto} containing the list of IDs of the created orders.
+     */
+    @PostMapping(&quot;/all&quot;)
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;Long&gt;&gt; addOrders(@RequestBody OrdersAddDto orderDto) {
+<span class="fc" id="L69">        return new ResponseDto&lt;&gt;(orderService</span>
+<span class="fc" id="L70">                .addOrders(orderDto));</span>
+    }
+
+    /**
+     * Retrieves an order by its ID.
+     * &lt;p&gt;
+     * This method accepts the ID of the order as a path variable and returns the details of the order in a {@link OrderFindDto}.
+     * &lt;/p&gt;
+     *
+     * @param id the ID of the order to be retrieved.
+     * @return a {@link ResponseDto} containing the details of the found order.
+     */
+    @GetMapping(&quot;/{id}&quot;)
+    @ResponseStatus(HttpStatus.FOUND)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;OrderFindDto&gt; findById(@PathVariable Long id) {
+<span class="fc" id="L89">        return new ResponseDto&lt;&gt;(orderService</span>
+<span class="fc" id="L90">                .findById(id).toOrderFindDto());</span>
+    }
+
+    /**
+     * Retrieves multiple orders by their IDs.
+     * &lt;p&gt;
+     * This method accepts a list of order IDs as request parameters and returns the details of the orders in a list of {@link OrderFindDto}.
+     * &lt;/p&gt;
+     *
+     * @param ids the list of order IDs to be retrieved.
+     * @return a {@link ResponseDto} containing a list of found orders.
+     */
+    @GetMapping(&quot;/all&quot;)
+    @ResponseStatus(HttpStatus.FOUND)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;OrderFindDto&gt;&gt; findAllByIds(@RequestParam List&lt;Long&gt; ids) {
+<span class="fc" id="L109">        return new ResponseDto&lt;&gt;(ordersConverter</span>
+<span class="fc" id="L110">                .toOrderFindDto(orderService.findAllByIds(ids)));</span>
+    }
+
+    /**
+     * Removes an order by its ID.
+     * &lt;p&gt;
+     * This method accepts the ID of the order to be removed as a path variable and deletes the order.
+     * It returns the ID of the removed order wrapped in a {@link ResponseDto}.
+     * &lt;/p&gt;
+     *
+     * @param id the ID of the order to be removed.
+     * @return a {@link ResponseDto} containing the ID of the removed order.
+     */
+    @DeleteMapping(&quot;/{id}&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;Long&gt; removeById(@PathVariable Long id) {
+<span class="fc" id="L130">        return new ResponseDto&lt;&gt;(orderService.removeElement(id));</span>
+    }
+
+    /**
+     * Removes multiple orders by their IDs.
+     * &lt;p&gt;
+     * This method accepts a list of order IDs as request parameters and deletes the orders.
+     * It returns the list of IDs of the removed orders wrapped in a {@link ResponseDto}.
+     * &lt;/p&gt;
+     *
+     * @param ids the list of order IDs to be removed.
+     * @return a {@link ResponseDto} containing a list of the IDs of the removed orders.
+     */
+    @DeleteMapping(&quot;/all&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;Long&gt;&gt; removeAllByIds(@RequestParam List&lt;Long&gt; ids) {
+<span class="fc" id="L150">        return new ResponseDto&lt;&gt;(orderService.removeAllByIds(ids));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

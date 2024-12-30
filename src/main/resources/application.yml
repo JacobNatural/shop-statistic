@@ -1,0 +1,90 @@
+
+server:
+  port: 8080
+#-------------------------------------------- < HIBERNATE > --------------------------------------------------
+spring:
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQLDialect
+  datasource:
+    url: jdbc:mysql://mysql:3307/db_2?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: user
+    password: user123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#-------------------------------------------- < EMAIL > --------------------------------------------------
+  mail:
+    host: smtp.gmail.com
+    username: jakubmarjankowski0@gmail.com
+    password: gmxt ldja dtpt tclx
+    port: 587
+    protocol: smtp
+    properties:
+      mail.smtps.auth: true
+      mail.smtp.starttls.enable: true
+
+#-------------------------------------------- < LOGS > --------------------------------------------------
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+#-------------------------------------------- < VALIDATE > --------------------------------------------------
+validate:
+  client:
+    name.regex: '[a-zA-Z]+'
+    name.min.length: 4
+    surname.regex: '[a-zA-Z\- ]+'
+    surname.min.length: 4
+    min.age: 10
+    min.cash: 1
+  product:
+    name.regex: '[a-zA-Z]+'
+    name.min.length: 3
+    category.regex: '[ a-z\\-]+'
+    category.min.length: 3
+    min.price: 0.1
+  user:
+    username.regex: '[0-9a-zA-Z\- ]+'
+    username.min.length: 5
+    name.regex: '[a-zA-Z]+'
+    name.min.length: 3
+    surname.regex: '[a-zA-Z\- ]+'
+    surname.min.length: 3
+    password.regexs: >
+      [A-Z],
+      [a-z],
+      [0-9],
+      [!@#$%^&*?]
+    password.min.length: 8
+    email.regex: '[\w\.\-]+@([a-z]{2,8}\.){1,2}[a-z]{2,6}'
+
+#-------------------------------------------- < ADMIN > --------------------------------------------------
+admin:
+  username: 'admin'
+  password: 'admin123'
+  name: 'admin'
+  surname: 'admin'
+  email: 'jakubmarjankowski@gmail.com'
+
+#-------------------------------------------- < TOKENS > --------------------------------------------------
+
+activation-mail-expiration-time: 300000000000
+tokens:
+  access:
+    expiration_time_ms: 300000
+  refresh:
+    expiration_time_ms: 30000000
+    access_token_expiration_time_ms_property: 'access_token_expiration_time_ms_property'
+  prefix: 'Bearer '
+
+
+
+
+

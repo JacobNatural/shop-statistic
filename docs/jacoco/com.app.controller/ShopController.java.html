@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShopController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller</a> &gt; <span class="el_source">ShopController.java</span></div><h1>ShopController.java</h1><pre class="source lang-java linenums">package com.app.controller;
+
+import com.app.controller.dto.*;
+import com.app.controller.dto.product.ProductDto;
+import com.app.controller.dto.order.CategoryAndPriceStatisticDto;
+import com.app.controller.dto.order.ClientAndDebitDto;
+import com.app.controller.dto.order.GroupByDto;
+import com.app.converter.many.impl.ClientsConverterImpl;
+import com.app.converter.many.impl.ProductsConverterImpl;
+import com.app.converter.many.impl.ShopConverterImpl;
+import com.app.service.ShopStatisticService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * Controller for handling shop-related statistics and data aggregation.
+ * &lt;p&gt;
+ * This class provides endpoints for fetching shop-related statistics such as
+ * top clients based on payment, most popular categories, product pricing
+ * statistics, client demographics, and debt information.
+ * &lt;/p&gt;
+ */
+@RequiredArgsConstructor
+@RequestMapping(&quot;/shop&quot;)
+@RestController
+public class ShopController {
+
+    private final ShopStatisticService shopStatisticService;
+    private final ClientsConverterImpl clientsConverter;
+    private final ShopConverterImpl shopConverterImpl;
+    private final ProductsConverterImpl productsConverterImpl;
+
+    /**
+     * Retrieves the clients with the biggest payments.
+     * &lt;p&gt;
+     * This endpoint returns a list of clients who have made the largest payments.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ResponseDto} containing a list of {@link ClientDto} representing the clients with the largest payments.
+     */
+    @GetMapping(&quot;/clients/top&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;ClientDto&gt;&gt; getClientWithBiggerPayment() {
+<span class="fc" id="L53">        return new ResponseDto&lt;&gt;(clientsConverter</span>
+<span class="fc" id="L54">                .toDtoList(shopStatisticService.getClientWithBiggerPayment()));</span>
+    }
+
+    /**
+     * Retrieves the clients with the biggest payments in a specific category.
+     * &lt;p&gt;
+     * This endpoint returns a list of clients who have made the largest payments
+     * in a given product category.
+     * &lt;/p&gt;
+     *
+     * @param category the product category for which to find clients with the largest payments.
+     * @return a {@link ResponseDto} containing a list of {@link ClientDto} representing the clients with the largest payments in the given category.
+     */
+    @GetMapping(&quot;/clients/top/{category}&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;ClientDto&gt;&gt; getClientWithBiggerPaymentInCategory(@PathVariable String category) {
+<span class="fc" id="L74">        return new ResponseDto&lt;&gt;(clientsConverter</span>
+<span class="fc" id="L75">                .toDtoList(shopStatisticService.getClientWithBiggerPaymentInCategory(category)));</span>
+    }
+
+    /**
+     * Retrieves the most popular product category for each age group.
+     * &lt;p&gt;
+     * This endpoint returns a list of age groups and the most popular product category
+     * for each age group.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ResponseDto} containing a list of {@link GroupByDto} representing age groups and their most popular categories.
+     */
+    @GetMapping(&quot;/clients/age/category&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;GroupByDto&lt;Integer, String&gt;&gt;&gt; getAgeAndMostCategory() {
+<span class="fc" id="L94">        return new ResponseDto&lt;&gt;(shopConverterImpl.toAgeMostCategoryDto(shopStatisticService.getAgeAndMostCategory()));</span>
+    }
+
+    /**
+     * Retrieves category-wise product price statistics.
+     * &lt;p&gt;
+     * This endpoint returns the price statistics for products categorized by their product type.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ResponseDto} containing a list of {@link CategoryAndPriceStatisticDto} representing product category price statistics.
+     */
+    @GetMapping(&quot;/products/category/price_statistic&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;CategoryAndPriceStatisticDto&gt;&gt; getCategoryAndPriceStatistic() {
+<span class="fc" id="L112">        return new ResponseDto&lt;&gt;(productsConverterImpl</span>
+<span class="fc" id="L113">                .categoryAndPriceStatisticDto(shopStatisticService.getCategoryAndPriceStatistic()));</span>
+    }
+
+    /**
+     * Retrieves the most popular product for each age group.
+     * &lt;p&gt;
+     * This endpoint returns a list of age groups and the most popular product purchased
+     * by customers in each age group.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ResponseDto} containing a list of {@link GroupByDto} representing age groups and their most popular products.
+     */
+    @GetMapping(&quot;clients/age/product&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;GroupByDto&lt;Integer, ProductDto&gt;&gt;&gt; getAgeAndMostProduct() {
+<span class="fc" id="L132">        return new ResponseDto&lt;&gt;(productsConverterImpl</span>
+<span class="fc" id="L133">                .ageAndMostProductDto(shopStatisticService.getAgeAndMostProduct()));</span>
+    }
+
+    /**
+     * Retrieves the most common clients in each product category.
+     * &lt;p&gt;
+     * This endpoint returns a list of product categories and the most common clients
+     * within each category.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ResponseDto} containing a list of {@link GroupByDto} representing product categories and their most common clients.
+     */
+    @GetMapping(&quot;/clients/category&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;GroupByDto&lt;String, ClientDto&gt;&gt;&gt; getCategoryAndMostClient() {
+<span class="fc" id="L152">        return new ResponseDto&lt;&gt;(clientsConverter</span>
+<span class="fc" id="L153">                .toCategoryAndMostClientDto(shopStatisticService.getCategoryAndMostClient()));</span>
+    }
+
+    /**
+     * Retrieves clients and their associated debts.
+     * &lt;p&gt;
+     * This endpoint returns a list of clients along with their corresponding debit amounts.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ResponseDto} containing a list of {@link ClientAndDebitDto} representing clients and their debts.
+     */
+    @GetMapping(&quot;/clients/debits&quot;)
+    @Operation(
+            description = &quot;Access only for ADMIN, LEADER and WORKER using JWT&quot;,
+            security = @SecurityRequirement(name = &quot;bearerAuth&quot;)
+    )
+    public ResponseDto&lt;List&lt;ClientAndDebitDto&gt;&gt; getClientsAndDebt() {
+<span class="fc" id="L170">        return new ResponseDto&lt;&gt;(clientsConverter</span>
+<span class="fc" id="L171">                .toClientAndDebitDto(shopStatisticService.getClientsAndDebit()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

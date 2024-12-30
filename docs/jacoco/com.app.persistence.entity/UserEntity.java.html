@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.persistence.entity</a> &gt; <span class="el_source">UserEntity.java</span></div><h1>UserEntity.java</h1><pre class="source lang-java linenums">package com.app.persistence.entity;
+
+import com.app.model.Role;
+import com.app.security.dto.UserDetailsDto;
+import com.app.security.dto.UsernamePasswordAuthenticationTokenDto;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * JPA Entity representing a user in the database.
+ * &lt;p&gt;
+ * This class is a JPA entity mapped to the `users` table in the database. It contains fields
+ * for the user's username, name, surname, password, email, role, and enable status.
+ * The class provides various methods to convert the entity to different data transfer objects
+ * (DTOs) and to perform specific user-related actions such as updating role, email, or password.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * The entity is mapped to the `users` table, and each user has a unique username. The user's
+ * role is stored as an enumerated type, and the `enable` field determines whether the user's
+ * account is active or not.
+ * &lt;/p&gt;
+ */
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@Setter
+@Getter
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = &quot;users&quot;)
+public class UserEntity extends BaseEntity {
+
+    /**
+     * The username of the user.
+     * &lt;p&gt;
+     * This field stores the unique username of the user, which is used for authentication.
+     * &lt;/p&gt;
+     */
+    private String username;
+
+    /**
+     * The name of the user.
+     * &lt;p&gt;
+     * This field stores the first name of the user.
+     * &lt;/p&gt;
+     */
+    private String name;
+
+    /**
+     * The surname of the user.
+     * &lt;p&gt;
+     * This field stores the surname of the user.
+     * &lt;/p&gt;
+     */
+    private String surname;
+
+    /**
+     * The password of the user.
+     * &lt;p&gt;
+     * This field stores the encrypted password for the user.
+     * &lt;/p&gt;
+     */
+    private String password;
+
+    /**
+     * The email address of the user.
+     * &lt;p&gt;
+     * This field stores the email address associated with the user.
+     * &lt;/p&gt;
+     */
+    private String email;
+
+    /**
+     * The enable status of the user.
+     * &lt;p&gt;
+     * This field indicates whether the user account is active (`true`) or disabled (`false`).
+     * &lt;/p&gt;
+     */
+    private Boolean enable;
+
+    /**
+     * The role of the user.
+     * &lt;p&gt;
+     * This field stores the role of the user, which is an enumerated type {@link Role}.
+     * The role determines the user's access rights within the system (e.g., worker, leader, admin).
+     * &lt;/p&gt;
+     */
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    /**
+     * Creates a new `UserEntity` with an updated password.
+     * &lt;p&gt;
+     * This method returns a new `UserEntity` instance with the updated password while keeping
+     * the other fields unchanged.
+     * &lt;/p&gt;
+     *
+     * @param password The new password to be set.
+     * @return A new instance of `UserEntity` with the updated password.
+     */
+    public UserEntity withPassword(String password) {
+<span class="fc" id="L108">        return UserEntity</span>
+<span class="fc" id="L109">                .builder()</span>
+<span class="fc" id="L110">                .id(id)</span>
+<span class="fc" id="L111">                .username(username)</span>
+<span class="fc" id="L112">                .name(name)</span>
+<span class="fc" id="L113">                .surname(surname)</span>
+<span class="fc" id="L114">                .password(password)</span>
+<span class="fc" id="L115">                .email(email)</span>
+<span class="fc" id="L116">                .enable(enable)</span>
+<span class="fc" id="L117">                .role(role)</span>
+<span class="fc" id="L118">                .build();</span>
+    }
+
+    /**
+     * Creates a new `UserEntity` with the account marked as enabled (activated).
+     * &lt;p&gt;
+     * This method returns a new `UserEntity` instance with the same data, but the `enable` field
+     * is set to `true`, indicating the user account is activated.
+     * &lt;/p&gt;
+     *
+     * @return A new instance of `UserEntity` with the account activated.
+     */
+    public UserEntity toActivateUserEntity() {
+<span class="fc" id="L131">        return UserEntity</span>
+<span class="fc" id="L132">                .builder()</span>
+<span class="fc" id="L133">                .id(id)</span>
+<span class="fc" id="L134">                .username(username)</span>
+<span class="fc" id="L135">                .name(name)</span>
+<span class="fc" id="L136">                .surname(surname)</span>
+<span class="fc" id="L137">                .password(password)</span>
+<span class="fc" id="L138">                .email(email)</span>
+<span class="fc" id="L139">                .enable(true)</span>
+<span class="fc" id="L140">                .role(role)</span>
+<span class="fc" id="L141">                .build();</span>
+    }
+
+    /**
+     * Creates a new `UserEntity` with a different role.
+     * &lt;p&gt;
+     * This method returns a new `UserEntity` instance with the same data, but with the specified
+     * role instead of the current role.
+     * &lt;/p&gt;
+     *
+     * @param role The new role to be assigned to the user.
+     * @return A new instance of `UserEntity` with the updated role.
+     */
+    public UserEntity toNewRoleEntity(Role role) {
+<span class="fc" id="L155">        return UserEntity</span>
+<span class="fc" id="L156">                .builder()</span>
+<span class="fc" id="L157">                .id(id)</span>
+<span class="fc" id="L158">                .username(username)</span>
+<span class="fc" id="L159">                .name(name)</span>
+<span class="fc" id="L160">                .surname(surname)</span>
+<span class="fc" id="L161">                .password(password)</span>
+<span class="fc" id="L162">                .email(email)</span>
+<span class="fc" id="L163">                .enable(true)</span>
+<span class="fc" id="L164">                .role(role)</span>
+<span class="fc" id="L165">                .build();</span>
+    }
+
+    /**
+     * Creates a new `UserEntity` with a different email.
+     * &lt;p&gt;
+     * This method returns a new `UserEntity` instance with the same data, but with the specified
+     * email instead of the current email.
+     * &lt;/p&gt;
+     *
+     * @param email The new email to be assigned to the user.
+     * @return A new instance of `UserEntity` with the updated email.
+     */
+    public UserEntity toNewEmailEntity(String email) {
+<span class="fc" id="L179">        return UserEntity</span>
+<span class="fc" id="L180">                .builder()</span>
+<span class="fc" id="L181">                .id(id)</span>
+<span class="fc" id="L182">                .username(username)</span>
+<span class="fc" id="L183">                .name(name)</span>
+<span class="fc" id="L184">                .surname(surname)</span>
+<span class="fc" id="L185">                .password(password)</span>
+<span class="fc" id="L186">                .email(email)</span>
+<span class="fc" id="L187">                .enable(true)</span>
+<span class="fc" id="L188">                .role(role)</span>
+<span class="fc" id="L189">                .build();</span>
+    }
+
+    /**
+     * Converts the `UserEntity` to a `UserDetailsDto`.
+     * &lt;p&gt;
+     * This method converts the `UserEntity` into a `UserDetailsDto`, which is a simplified data
+     * transfer object that includes the username, password, enable status, and role of the user.
+     * &lt;/p&gt;
+     *
+     * @return A `UserDetailsDto` containing the user's details.
+     */
+    public UserDetailsDto toUserDetailsDto() {
+<span class="fc" id="L202">        return new UserDetailsDto(username, password, enable, role.toString());</span>
+    }
+
+    /**
+     * Checks if the user is activated.
+     * &lt;p&gt;
+     * This method returns `true` if the user's account is enabled, indicating that the user is
+     * activated. Otherwise, it returns `false`.
+     * &lt;/p&gt;
+     *
+     * @return `true` if the user is activated, `false` otherwise.
+     */
+    public boolean isActivate() {
+<span class="fc" id="L215">        return enable;</span>
+    }
+
+    /**
+     * Converts the `UserEntity` to a `UsernamePasswordAuthenticationTokenDto`.
+     * &lt;p&gt;
+     * This method converts the `UserEntity` into a DTO used for authentication purposes,
+     * including the username and role of the user.
+     * &lt;/p&gt;
+     *
+     * @return A `UsernamePasswordAuthenticationTokenDto` containing the user's username and role.
+     */
+    public UsernamePasswordAuthenticationTokenDto toUsernamePasswordAuthenticationTokenDto() {
+<span class="fc" id="L228">        return new UsernamePasswordAuthenticationTokenDto(username, role.toString());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

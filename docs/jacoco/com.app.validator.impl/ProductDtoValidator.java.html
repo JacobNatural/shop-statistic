@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDtoValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.validator.impl</a> &gt; <span class="el_source">ProductDtoValidator.java</span></div><h1>ProductDtoValidator.java</h1><pre class="source lang-java linenums">package com.app.validator.impl;
+
+import com.app.controller.dto.product.ProductDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+
+import java.math.BigDecimal;
+
+/**
+ * Validator for validating {@link ProductDto} objects.
+ * Ensures that the product name, category, and price meet the specified validation rules.
+ */
+@Component
+@RequiredArgsConstructor
+public class ProductDtoValidator implements Validator {
+
+    /**
+     * Regular expression to validate the product name.
+     */
+    @Value(&quot;${validate.product.name.regex}&quot;)
+    private String nameRegex;
+
+    /**
+     * Minimum length for the product name.
+     */
+    @Value(&quot;${validate.product.name.min.length}&quot;)
+    private int nameMinLength;
+
+    /**
+     * Regular expression to validate the product category.
+     */
+    @Value(&quot;${validate.product.category.regex}&quot;)
+    private String categoryRegex;
+
+    /**
+     * Minimum length for the product category.
+     */
+    @Value(&quot;${validate.product.category.min.length}&quot;)
+    private int categoryMinLength;
+
+    /**
+     * Minimum acceptable price for the product.
+     */
+    @Value(&quot;${validate.product.min.price}&quot;)
+    private BigDecimal minPrice;
+
+    /**
+     * {@inheritDoc}
+     * This method checks if the given class is {@link ProductDto}.
+     *
+     * @param clazz the class to check
+     * @return true if the class is {@link ProductDto}, false otherwise
+     */
+    @Override
+    public boolean supports(Class&lt;?&gt; clazz) {
+<span class="fc" id="L59">        return clazz.equals(ProductDto.class);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * This method performs validation on the given {@link ProductDto} object.
+     * It validates the product's name, category, and price according to the specified rules.
+     *
+     * @param target the object to validate
+     * @param errors the {@link Errors} object to hold validation errors
+     */
+    @Override
+    public void validate(Object target, Errors errors) {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (target instanceof ProductDto product) {</span>
+<span class="fc" id="L73">            validateName(product.name(), errors);</span>
+<span class="fc" id="L74">            validateCategory(product.category(), errors);</span>
+<span class="fc" id="L75">            validatePrice(product.price(), errors);</span>
+        }
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Validates the product's name.
+     * - Checks if the name is not null.
+     * - Checks if the name meets the minimum length requirement.
+     * - Checks if the name matches the configured regular expression.
+     *
+     * @param name the name of the product
+     * @param errors the {@link Errors} object to hold validation errors
+     */
+    private void validateName(String name, Errors errors) {
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (stringNullCheck(name)) {</span>
+<span class="fc" id="L90">            errors.rejectValue(&quot;name&quot;, &quot;Product name cannot be null&quot;);</span>
+<span class="fc" id="L91">            return;</span>
+        }
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (stringMinLength(name, nameMinLength)) {</span>
+<span class="fc" id="L94">            errors.rejectValue(&quot;name&quot;, &quot;Product name must be at least &quot; + nameMinLength + &quot; characters&quot;);</span>
+<span class="fc" id="L95">            return;</span>
+        }
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (!stringRegexCheck(name, nameRegex)) {</span>
+<span class="fc" id="L98">            errors.rejectValue(&quot;name&quot;, &quot;Product name contains invalid characters&quot;);</span>
+        }
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * Validates the product's category.
+     * - Checks if the category is not null.
+     * - Checks if the category meets the minimum length requirement.
+     * - Checks if the category matches the configured regular expression.
+     *
+     * @param category the category of the product
+     * @param errors the {@link Errors} object to hold validation errors
+     */
+    private void validateCategory(String category, Errors errors) {
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (stringNullCheck(category)) {</span>
+<span class="fc" id="L113">            errors.rejectValue(&quot;category&quot;, &quot;Product category cannot be null&quot;);</span>
+<span class="fc" id="L114">            return;</span>
+        }
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (stringMinLength(category, categoryMinLength)) {</span>
+<span class="fc" id="L117">            errors.rejectValue(&quot;category&quot;, &quot;Product category must be at least &quot; + categoryMinLength + &quot; characters&quot;);</span>
+<span class="fc" id="L118">            return;</span>
+        }
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (!stringRegexCheck(category, categoryRegex)) {</span>
+<span class="fc" id="L121">            errors.rejectValue(&quot;category&quot;, &quot;Product category contains invalid characters&quot;);</span>
+        }
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Validates the product's price.
+     * - Checks if the price is not null.
+     * - Checks if the price is greater than the configured minimum price.
+     *
+     * @param price the price of the product
+     * @param errors the {@link Errors} object to hold validation errors
+     */
+    private void validatePrice(BigDecimal price, Errors errors) {
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        if (price == null) {</span>
+<span class="fc" id="L135">            errors.rejectValue(&quot;price&quot;, &quot;Price cannot be null&quot;);</span>
+<span class="fc" id="L136">            return;</span>
+        }
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        if (price.compareTo(minPrice) &lt;= 0) {</span>
+<span class="fc" id="L139">            errors.rejectValue(&quot;price&quot;, &quot;Product price must be greater than &quot; + minPrice);</span>
+        }
+<span class="fc" id="L141">    }</span>
+
+    /**
+     * Checks if the given string is null.
+     *
+     * @param s the string to check
+     * @return true if the string is null, false otherwise
+     */
+    private boolean stringNullCheck(String s) {
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        return s == null;</span>
+    }
+
+    /**
+     * Checks if the given string's length is less than the specified minimum length.
+     *
+     * @param s the string to check
+     * @param minLength the minimum length
+     * @return true if the string's length is less than the minimum length, false otherwise
+     */
+    private boolean stringMinLength(String s, int minLength) {
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        return s.length() &lt; minLength;</span>
+    }
+
+    /**
+     * Checks if the given string matches the specified regular expression.
+     *
+     * @param s the string to check
+     * @param regex the regular expression
+     * @return true if the string matches the regex, false otherwise
+     */
+    private boolean stringRegexCheck(String s, String regex) {
+<span class="fc" id="L172">        return s.matches(regex);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

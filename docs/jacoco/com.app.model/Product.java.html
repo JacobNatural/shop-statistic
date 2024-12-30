@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Product.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.model</a> &gt; <span class="el_source">Product.java</span></div><h1>Product.java</h1><pre class="source lang-java linenums">package com.app.model;
+
+import com.app.controller.dto.product.ProductDto;
+import com.app.persistence.entity.ProductEntity;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.math.BigDecimal;
+
+/**
+ * Represents a product in the system.
+ * &lt;p&gt;
+ * This class contains details about a product such as its unique identifier, name, category, and price.
+ * It provides methods to convert the product to an entity for persistence and to a DTO (Data Transfer Object) for transferring data.
+ * &lt;/p&gt;
+ */
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode(of = &quot;id&quot;)
+public class Product {
+
+    /**
+     * The unique identifier of the product.
+     * &lt;p&gt;
+     * This ID uniquely identifies a product in the system.
+     * &lt;/p&gt;
+     */
+    final long id;
+
+    /**
+     * The name of the product.
+     * &lt;p&gt;
+     * This field represents the name of the product.
+     * &lt;/p&gt;
+     */
+    final String name;
+
+    /**
+     * The category the product belongs to.
+     * &lt;p&gt;
+     * This field represents the category of the product (e.g., electronics, clothing).
+     * &lt;/p&gt;
+     */
+    final String category;
+
+    /**
+     * The price of the product.
+     * &lt;p&gt;
+     * This field represents the price of the product. It is used to calculate costs, discounts, etc.
+     * &lt;/p&gt;
+     */
+    final BigDecimal price;
+
+    /**
+     * Converts this product to a {@link ProductDto} object.
+     * &lt;p&gt;
+     * A DTO is used for transferring data over the network or between layers of the application.
+     * &lt;/p&gt;
+     *
+     * @return a new {@link ProductDto} object populated with this product's data
+     */
+    public ProductDto toProductDto() {
+<span class="fc" id="L64">        return new ProductDto(id, name, category, price);</span>
+    }
+
+    /**
+     * Converts this product to a {@link ProductEntity} object.
+     * &lt;p&gt;
+     * An entity is used to represent the product in the database, allowing for persistence operations.
+     * &lt;/p&gt;
+     *
+     * @return a new {@link ProductEntity} object populated with this product's data
+     */
+    public ProductEntity toProductEntity() {
+<span class="fc" id="L76">        return ProductEntity</span>
+<span class="fc" id="L77">                .builder()</span>
+<span class="fc" id="L78">                .id(id)</span>
+<span class="fc" id="L79">                .name(name)</span>
+<span class="fc" id="L80">                .category(category)</span>
+<span class="fc" id="L81">                .price(price)</span>
+<span class="fc" id="L82">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

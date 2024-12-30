@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppAuthorizationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.security.filter</a> &gt; <span class="el_source">AppAuthorizationFilter.java</span></div><h1>AppAuthorizationFilter.java</h1><pre class="source lang-java linenums">package com.app.security.filter;
+
+import com.app.security.service.TokenService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import java.io.IOException;
+
+/**
+ * Custom filter to handle authorization by parsing the access token from the request.
+ * &lt;p&gt;
+ * This filter checks the HTTP request for an Authorization header containing a Bearer token,
+ * parses the token using {@link TokenService}, and sets the authentication in the security context
+ * if the token is valid. This allows the application to identify the authenticated user and their roles.
+ * &lt;/p&gt;
+ */
+public class AppAuthorizationFilter extends BasicAuthenticationFilter {
+
+    private final TokenService tokenService;
+
+    /**
+     * Constructs a new {@link AppAuthorizationFilter} with the specified {@link AuthenticationManager}
+     * and {@link TokenService}.
+     *
+     * @param authenticationManager the authentication manager used to authenticate the user
+     * @param tokenService          the service responsible for parsing and validating the access token
+     */
+    public AppAuthorizationFilter(AuthenticationManager authenticationManager, TokenService tokenService) {
+<span class="fc" id="L35">        super(authenticationManager);</span>
+<span class="fc" id="L36">        this.tokenService = tokenService;</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * Filters the incoming request to parse the Authorization header and extract the access token.
+     * &lt;p&gt;
+     * If the Authorization header is present and contains a valid Bearer token, this method will
+     * parse the token using the {@link TokenService} and set the authentication in the security context.
+     * &lt;/p&gt;
+     *
+     * @param request  the HTTP request
+     * @param response the HTTP response
+     * @param chain    the filter chain
+     * @throws IOException      if an I/O error occurs
+     * @throws ServletException if a servlet exception occurs
+     */
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response,
+            FilterChain chain) throws IOException, ServletException {
+
+<span class="fc" id="L57">        var header = request.getHeader(HttpHeaders.AUTHORIZATION);</span>
+
+        // Check if the Authorization header is present
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (header != null) {</span>
+            // Parse the access token and set the authentication context
+<span class="fc" id="L62">            var authorizedUser = tokenService.parseAccessToken(header);</span>
+<span class="fc" id="L63">            SecurityContextHolder.getContext().setAuthentication(authorizedUser);</span>
+        }
+
+        // Proceed with the next filter in the chain
+<span class="fc" id="L67">        chain.doFilter(request, response);</span>
+<span class="fc" id="L68">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

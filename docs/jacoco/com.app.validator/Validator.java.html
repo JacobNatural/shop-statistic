@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Validator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.validator</a> &gt; <span class="el_source">Validator.java</span></div><h1>Validator.java</h1><pre class="source lang-java linenums">package com.app.validator;
+
+/**
+ * A generic interface for validating objects of type {@link T}.
+ * Implementations of this interface should define the validation logic for the specific type {@link T}.
+ *
+ * @param &lt;T&gt; the type of object to be validated
+ */
+public interface Validator&lt;T&gt; {
+
+    /**
+     * Validates the given object of type {@link T}.
+     * The validation logic should be implemented by classes that implement this interface.
+     *
+     * @param t the object to validate
+     * @return a string containing the validation error message, or an empty string if validation passes
+     */
+    String validate(T t);
+
+    /**
+     * A utility method to validate an object using the provided {@link Validator}.
+     * If the validation fails (i.e., the error message is not empty), an {@link IllegalArgumentException} is thrown.
+     *
+     * @param t the object to validate
+     * @param validator the validator to use for validation
+     * @param &lt;T&gt; the type of object to be validated
+     * @throws IllegalArgumentException if validation fails
+     */
+    static &lt;T&gt; void validate(T t, Validator&lt;T&gt; validator) {
+<span class="fc" id="L30">        var errors = validator.validate(t);</span>
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (!errors.isEmpty()) {</span>
+<span class="fc" id="L33">            throw new IllegalArgumentException(errors);</span>
+        }
+<span class="fc" id="L35">    }</span>
+
+    /**
+     * Checks if a given string is null.
+     *
+     * @param s the string to check
+     * @return {@code true} if the string is null, {@code false} otherwise
+     */
+    static boolean stringNullCheck(String s) {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        return s == null;</span>
+    }
+
+    /**
+     * Checks if the length of a given string is less than the specified minimum length.
+     *
+     * @param s the string to check
+     * @param minLength the minimum length
+     * @return {@code true} if the string's length is less than the minimum length, {@code false} otherwise
+     */
+    static boolean stringMinLength(String s, int minLength) {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        return s.length() &lt; minLength;</span>
+    }
+
+    /**
+     * Checks if a given string matches the specified regular expression.
+     *
+     * @param s the string to check
+     * @param regex the regular expression
+     * @return {@code true} if the string matches the regular expression, {@code false} otherwise
+     */
+    static boolean stringRegexCheck(String s, String regex) {
+<span class="fc" id="L66">        return s.matches(regex);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

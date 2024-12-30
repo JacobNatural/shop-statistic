@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppWebSecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.security.config</a> &gt; <span class="el_source">AppWebSecurityConfig.java</span></div><h1>AppWebSecurityConfig.java</h1><pre class="source lang-java linenums">package com.app.security.config;
+
+import com.app.security.dto.AuthenticationErrorDto;
+import com.app.security.filter.AppAuthenticationFilter;
+import com.app.security.filter.AppAuthorizationFilter;
+import com.app.security.service.TokenService;
+import com.app.security.service.impl.AppUserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+/**
+ * Security configuration for the web application.
+ * &lt;p&gt;
+ * This class configures the web security settings for the application. It includes CORS settings, authentication and authorization filters,
+ * exception handling, and session management. The class ensures that the application is stateless, uses JWT for authentication,
+ * and provides different access levels based on user roles.
+ * &lt;/p&gt;
+ */
+@EnableWebSecurity
+@Configuration
+@RequiredArgsConstructor
+public class AppWebSecurityConfig {
+
+    private final AppUserDetailsServiceImpl appUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
+
+    /**
+     * Configures the HTTP security settings for the web application.
+     * &lt;p&gt;
+     * This method sets up the authentication manager, CORS configuration, CSRF settings, exception handling,
+     * session management, and HTTP request authorization rules. It also adds custom authentication and authorization filters
+     * to handle token-based authentication and authorization.
+     * &lt;/p&gt;
+     *
+     * @param http the {@link HttpSecurity} object used to configure the HTTP security
+     * @return the configured {@link SecurityFilterChain}
+     * @throws Exception if there is an error during the configuration
+     */
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+<span class="fc" id="L61">        var authenticationManagerBuilder = http</span>
+<span class="fc" id="L62">                .getSharedObject(AuthenticationManagerBuilder.class);</span>
+
+<span class="fc" id="L64">        authenticationManagerBuilder</span>
+<span class="fc" id="L65">                .userDetailsService(appUserDetailsService)</span>
+<span class="fc" id="L66">                .passwordEncoder(passwordEncoder);</span>
+
+<span class="fc" id="L68">        var authenticationManager = authenticationManagerBuilder.build();</span>
+
+<span class="fc" id="L70">        http</span>
+<span class="fc" id="L71">                .cors(httpSecurityCorsConfigurer -&gt;</span>
+<span class="fc" id="L72">                        httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))</span>
+<span class="fc" id="L73">                .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L74">                .exceptionHandling(httpSecurityExceptionHandlingConfigurer -&gt; {</span>
+<span class="fc" id="L75">                    httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(authenticationEntryPoint());</span>
+<span class="fc" id="L76">                    httpSecurityExceptionHandlingConfigurer.accessDeniedHandler(accessDeniedHandler());</span>
+<span class="fc" id="L77">                })</span>
+<span class="fc" id="L78">                .sessionManagement(httpSecuritySessionManagementConfigurer -&gt;</span>
+<span class="fc" id="L79">                        httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="fc" id="L80">                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -&gt;</span>
+                        authorizationManagerRequestMatcherRegistry
+<span class="fc" id="L82">                                .requestMatchers(HttpMethod.GET, &quot;/swagger-ui/**&quot;, &quot;/v3/api-docs/**&quot;, &quot;/swagger-ui.html&quot;)</span>
+<span class="fc" id="L83">                                .permitAll()</span>
+<span class="fc" id="L84">                                .requestMatchers(HttpMethod.PATCH, &quot;/users/login/password&quot;)</span>
+<span class="fc" id="L85">                                .permitAll()</span>
+<span class="fc" id="L86">                                .requestMatchers(HttpMethod.POST, &quot;/users/login/**&quot;, &quot;/login&quot;)</span>
+<span class="fc" id="L87">                                .permitAll()</span>
+<span class="fc" id="L88">                                .requestMatchers(&quot;/orders/**&quot;, &quot;/shop/**&quot;, &quot;/users/password&quot;).hasAnyRole(&quot;WORKER&quot;, &quot;LEADER&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L89">                                .requestMatchers(&quot;/clients/**&quot;, &quot;/products/**&quot;).hasAnyRole(&quot;LEADER&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L90">                                .requestMatchers(&quot;/**&quot;).hasAnyRole(&quot;ADMIN&quot;)</span>
+<span class="fc" id="L91">                                .anyRequest()</span>
+<span class="fc" id="L92">                                .authenticated())</span>
+<span class="fc" id="L93">                .addFilter(new AppAuthenticationFilter(tokenService, authenticationManager))</span>
+<span class="fc" id="L94">                .addFilter(new AppAuthorizationFilter(authenticationManager, tokenService))</span>
+<span class="fc" id="L95">                .authenticationManager(authenticationManager);</span>
+
+<span class="fc" id="L97">        return http.build();</span>
+    }
+
+    /**
+     * Configures the authentication entry point for the application.
+     * &lt;p&gt;
+     * This method handles unauthorized access by returning a custom error response with a 403 status code.
+     * &lt;/p&gt;
+     *
+     * @return the configured {@link AuthenticationEntryPoint}
+     */
+    private AuthenticationEntryPoint authenticationEntryPoint() {
+<span class="fc" id="L109">        return (request, response, authException) -&gt; {</span>
+<span class="fc" id="L110">            var ex = new AuthenticationErrorDto(authException.getMessage());</span>
+<span class="fc" id="L111">            response.setStatus(403);</span>
+<span class="fc" id="L112">            response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span>
+<span class="fc" id="L113">            response.getWriter().write(new ObjectMapper().writeValueAsString(ex));</span>
+<span class="fc" id="L114">            response.getWriter().flush();</span>
+<span class="fc" id="L115">            response.getWriter().close();</span>
+<span class="fc" id="L116">        };</span>
+    }
+
+    /**
+     * Configures the access denied handler for the application.
+     * &lt;p&gt;
+     * This method handles access denied scenarios by returning a custom error response with a 403 status code.
+     * &lt;/p&gt;
+     *
+     * @return the configured {@link AccessDeniedHandler}
+     */
+    private AccessDeniedHandler accessDeniedHandler() {
+<span class="fc" id="L128">        return (request, response, accessDeniedException) -&gt; {</span>
+<span class="fc" id="L129">            var ex = new AuthenticationErrorDto(accessDeniedException.getMessage());</span>
+<span class="fc" id="L130">            response.setStatus(403);</span>
+<span class="fc" id="L131">            response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span>
+<span class="fc" id="L132">            response.getWriter().write(new ObjectMapper().writeValueAsString(ex));</span>
+<span class="fc" id="L133">            response.getWriter().flush();</span>
+<span class="fc" id="L134">            response.getWriter().close();</span>
+<span class="fc" id="L135">        };</span>
+    }
+
+    /**
+     * Configures the CORS settings for the application.
+     * &lt;p&gt;
+     * This method allows cross-origin requests from the specified origins, enables credentials, and defines
+     * the allowed headers and HTTP methods for the application.
+     * &lt;/p&gt;
+     *
+     * @return the configured {@link CorsConfigurationSource}
+     */
+    private CorsConfigurationSource corsConfigurationSource() {
+<span class="fc" id="L148">        var corsConfiguration = new CorsConfiguration();</span>
+<span class="fc" id="L149">        corsConfiguration.setAllowedOrigins(List.of(&quot;http://localhost:3000&quot;));</span>
+<span class="fc" id="L150">        corsConfiguration.setAllowCredentials(true);</span>
+<span class="fc" id="L151">        corsConfiguration.setAllowedHeaders(List.of(</span>
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.CACHE_CONTROL,
+                &quot;X-Requested-With&quot;
+        ));
+<span class="fc" id="L157">        corsConfiguration.setAllowedMethods(</span>
+<span class="fc" id="L158">                List.of(</span>
+<span class="fc" id="L159">                        HttpMethod.GET.name(),</span>
+<span class="fc" id="L160">                        HttpMethod.POST.name(),</span>
+<span class="fc" id="L161">                        HttpMethod.PUT.name(),</span>
+<span class="fc" id="L162">                        HttpMethod.PATCH.name(),</span>
+<span class="fc" id="L163">                        HttpMethod.DELETE.name(),</span>
+<span class="fc" id="L164">                        HttpMethod.OPTIONS.name())</span>
+        );
+
+<span class="fc" id="L167">        var source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L168">        source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
+
+<span class="fc" id="L170">        return source;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

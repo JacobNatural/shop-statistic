@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductsFilterDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller.dto.product</a> &gt; <span class="el_source">ProductsFilterDto.java</span></div><h1>ProductsFilterDto.java</h1><pre class="source lang-java linenums">package com.app.controller.dto.product;
+
+import com.app.persistence.repository.specification.specification.ProductFilterSpecification;
+
+import java.math.BigDecimal;
+
+/**
+ * A DTO representing the filters that can be applied when retrieving products.
+ * &lt;p&gt;
+ * This class contains fields for filtering products by price range (low and high prices) and category.
+ * &lt;/p&gt;
+ */
+<span class="fc" id="L13">public record ProductsFilterDto(</span>
+        /**
+         * The minimum price for the product filter.
+         */
+        BigDecimal lowPrice,
+
+        /**
+         * The maximum price for the product filter.
+         */
+        BigDecimal highPrice,
+
+        /**
+         * The category of the products to filter.
+         */
+        String category) {
+
+    /**
+     * Converts this {@link ProductsFilterDto} into a {@link ProductFilterSpecification}.
+     * &lt;p&gt;
+     * This method creates a {@link ProductFilterSpecification} object that can be used to filter products based on the given
+     * price range and category.
+     * &lt;/p&gt;
+     *
+     * @return a {@link ProductFilterSpecification} object based on the values in this DTO.
+     */
+    public ProductFilterSpecification toProductFilterSpecification() {
+<span class="fc" id="L39">        return new ProductFilterSpecification(lowPrice, highPrice, category);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

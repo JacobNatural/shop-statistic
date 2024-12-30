@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Order.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.model</a> &gt; <span class="el_source">Order.java</span></div><h1>Order.java</h1><pre class="source lang-java linenums">package com.app.model;
+
+import com.app.controller.dto.order.OrderFindDto;
+import com.app.persistence.entity.OrderEntity;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+/**
+ * Represents an order in the system.
+ * &lt;p&gt;
+ * This class contains details about an order, including the unique order ID, the client placing the order, and the product being ordered.
+ * It provides methods to convert the order to an entity for persistence and to a DTO (Data Transfer Object) for transferring data.
+ * &lt;/p&gt;
+ */
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
+public class Order {
+
+    /**
+     * The unique identifier of the order.
+     * &lt;p&gt;
+     * This ID uniquely identifies an order in the system.
+     * &lt;/p&gt;
+     */
+    private final Long id;
+
+    /**
+     * The client who placed the order.
+     * &lt;p&gt;
+     * This field represents the client associated with the order.
+     * &lt;/p&gt;
+     */
+    private final Client client;
+
+    /**
+     * The product being ordered.
+     * &lt;p&gt;
+     * This field represents the product that the client is ordering.
+     * &lt;/p&gt;
+     */
+    private final Product product;
+
+    /**
+     * Converts this order to an {@link OrderEntity} object.
+     * &lt;p&gt;
+     * An entity is used to represent an order in the database, allowing for persistence operations.
+     * &lt;/p&gt;
+     *
+     * @return a new {@link OrderEntity} object populated with this order's data
+     */
+    public OrderEntity toOrderEntity() {
+<span class="fc" id="L54">        return OrderEntity</span>
+<span class="fc" id="L55">                .builder()</span>
+<span class="fc" id="L56">                .id(id)</span>
+<span class="fc" id="L57">                .productEntity(product.toProductEntity())</span>
+<span class="fc" id="L58">                .clientEntity(client.toClientEntity())</span>
+<span class="fc" id="L59">                .build();</span>
+    }
+
+    /**
+     * Converts this order to an {@link OrderFindDto} object.
+     * &lt;p&gt;
+     * A DTO is used for transferring data over the network or between layers of the application.
+     * &lt;/p&gt;
+     *
+     * @return a new {@link OrderFindDto} object populated with this order's data
+     */
+    public OrderFindDto toOrderFindDto() {
+<span class="fc" id="L71">        return new OrderFindDto(id, client.toClientDto(), product.toProductDto());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShopStatisticServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl</a> &gt; <span class="el_source">ShopStatisticServiceImpl.java</span></div><h1>ShopStatisticServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl;
+
+import com.app.model.Client;
+import com.app.persistence.entity.ClientEntity;
+import com.app.persistence.entity.view.*;
+import com.app.model.Product;
+import com.app.persistence.repository.OrderRepository;
+import com.app.persistence.repository.ProductRepository;
+import com.app.service.ShopStatisticService;
+import com.app.statistic.Statistic;
+import com.app.statistic.impl.StatisticImpl;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Implementation of the {@link ShopStatisticService} interface that provides functionality for fetching and processing
+ * statistics related to clients, products, and orders.
+ * &lt;p&gt;
+ * This service uses repositories for orders and products to gather statistical data about customer behavior, product sales,
+ * and spending patterns. The results are aggregated and returned in a variety of formats, such as maps, lists, and statistics.
+ * &lt;/p&gt;
+ */
+@Transactional
+@Service
+@AllArgsConstructor
+public class ShopStatisticServiceImpl implements ShopStatisticService {
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+
+    /**
+     * Retrieves a list of clients with the highest total payment amounts.
+     * &lt;p&gt;
+     * This method queries the {@link OrderRepository} to find clients who have spent the most, and then maps the result
+     * to a list of {@link Client} objects.
+     * &lt;/p&gt;
+     *
+     * @return A list of clients with the highest total payment amounts.
+     */
+    @Override
+    public List&lt;Client&gt; getClientWithBiggerPayment() {
+<span class="fc" id="L47">        return orderRepository</span>
+<span class="fc" id="L48">                .getClientWithBiggerPayment()</span>
+<span class="fc" id="L49">                .stream()</span>
+<span class="fc" id="L50">                .map(ClientEntity::toClient)</span>
+<span class="fc" id="L51">                .toList();</span>
+    }
+
+    /**
+     * Retrieves a list of clients who have spent the most in a specific product category.
+     * &lt;p&gt;
+     * This method allows filtering by category and uses the {@link OrderRepository} to find clients who have spent the most
+     * in the specified category, returning the result as a list of {@link Client} objects.
+     * &lt;/p&gt;
+     *
+     * @param category The category to filter by.
+     * @return A list of clients who have spent the most in the specified category.
+     * @throws IllegalArgumentException if the category is null or empty.
+     */
+    @Override
+    public List&lt;Client&gt; getClientWithBiggerPaymentInCategory(String category) {
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (category == null) {</span>
+<span class="fc" id="L68">            throw new IllegalArgumentException(&quot;Category cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (category.isEmpty()) {</span>
+<span class="fc" id="L72">            throw new IllegalArgumentException(&quot;Category cannot be empty&quot;);</span>
+        }
+
+<span class="fc" id="L75">        return orderRepository</span>
+<span class="fc" id="L76">                .getClientWithBiggerPaymentInCategory(category)</span>
+<span class="fc" id="L77">                .stream()</span>
+<span class="fc" id="L78">                .map(ClientEntity::toClient)</span>
+<span class="fc" id="L79">                .toList();</span>
+    }
+
+    /**
+     * Retrieves a map of client ages and their most frequently purchased product categories.
+     * &lt;p&gt;
+     * This method queries the {@link OrderRepository} to fetch the age of clients along with their most purchased product category.
+     * The result is returned as a map where the keys are client ages, and the values are lists of categories.
+     * &lt;/p&gt;
+     *
+     * @return A map of client ages to lists of most frequently purchased categories.
+     */
+    @Override
+    public Map&lt;Integer, List&lt;String&gt;&gt; getAgeAndMostCategory() {
+<span class="fc" id="L93">        return orderRepository</span>
+<span class="fc" id="L94">                .getAgeAndMostCategory()</span>
+<span class="fc" id="L95">                .stream()</span>
+<span class="fc" id="L96">                .collect(Collectors.toMap(</span>
+                        AgeMostOftenCategoryProjection::getAge,
+<span class="fc" id="L98">                        view -&gt; new ArrayList&lt;&gt;(List.of(view.getCategory())),</span>
+                        (v1, v2) -&gt; {
+<span class="fc" id="L100">                            v1.addAll(v2);</span>
+<span class="fc" id="L101">                            return v1;</span>
+                        })
+                );
+    }
+
+    /**
+     * Retrieves a map of client ages and their most frequently purchased products.
+     * &lt;p&gt;
+     * This method queries the {@link OrderRepository} to fetch client ages along with their most purchased products.
+     * The result is returned as a map where the keys are client ages, and the values are lists of {@link Product} objects.
+     * &lt;/p&gt;
+     *
+     * @return A map of client ages to lists of most frequently purchased products.
+     */
+    @Override
+    public Map&lt;Integer, List&lt;Product&gt;&gt; getAgeAndMostProduct() {
+<span class="fc" id="L117">        return orderRepository.getAgeAndMostProduct()</span>
+<span class="fc" id="L118">                .stream()</span>
+<span class="fc" id="L119">                .collect(Collectors.toMap(</span>
+                        AgeAndMostProductProjection::getAge,
+<span class="fc" id="L121">                        view -&gt; new ArrayList&lt;&gt;(List.of(new Product(</span>
+<span class="fc" id="L122">                                view.getId(), view.getName(), view.getCategory(), view.getPrice()))),</span>
+                        (v1, v2) -&gt; {
+<span class="fc" id="L124">                            v1.addAll(v2);</span>
+<span class="fc" id="L125">                            return v1;</span>
+                        }
+                ));
+    }
+
+    /**
+     * Retrieves statistics about product prices grouped by category.
+     * &lt;p&gt;
+     * This method uses the {@link ProductRepository} to get statistics about product prices within each category.
+     * The statistics are returned as a map of category names to {@link Statistic} objects that contain the price statistics.
+     * &lt;/p&gt;
+     *
+     * @return A map of categories to product price statistics.
+     */
+    @Override
+    public Map&lt;String, Statistic&lt;Product, BigDecimal&gt;&gt; getCategoryAndPriceStatistic() {
+<span class="fc" id="L141">        return productRepository</span>
+<span class="fc" id="L142">                .getCategoryAndPriceStatistic()</span>
+<span class="fc" id="L143">                .stream()</span>
+<span class="fc" id="L144">                .collect(</span>
+<span class="fc" id="L145">                        Collectors.toMap(</span>
+                                PriceStatisticByCategoryProjection::getCategory,
+                                StatisticImpl::fromView,
+                                Statistic::merge)
+                );
+    }
+
+    /**
+     * Retrieves a map of product categories and their most frequent clients.
+     * &lt;p&gt;
+     * This method queries the {@link OrderRepository} to fetch the most frequent clients for each product category.
+     * The result is returned as a map where the keys are product categories, and the values are lists of {@link Client} objects.
+     * &lt;/p&gt;
+     *
+     * @return A map of product categories to lists of the most frequent clients.
+     */
+    @Override
+    public Map&lt;String, List&lt;Client&gt;&gt; getCategoryAndMostClient() {
+<span class="fc" id="L163">        return orderRepository.getCategoryAndMostClient()</span>
+<span class="fc" id="L164">                .stream()</span>
+<span class="fc" id="L165">                .collect(Collectors.toMap(</span>
+                        CategoryAndMostClientProjection::getCategory,
+<span class="fc" id="L167">                        view -&gt; new ArrayList&lt;&gt;(List.of(new Client(</span>
+<span class="fc" id="L168">                                view.getId(), view.getName(), view.getSurname(), view.getAge(), view.getCash()</span>
+                        ))),
+                        (v1, v2) -&gt; {
+<span class="fc" id="L171">                            v1.addAll(v2);</span>
+<span class="fc" id="L172">                            return v1;</span>
+                        }
+                ));
+    }
+
+    /**
+     * Retrieves a map of clients and their associated debit values.
+     * &lt;p&gt;
+     * This method queries the {@link OrderRepository} to fetch each client along with their debit value, and returns the result
+     * as a map of {@link Client} objects to their corresponding debit values.
+     * &lt;/p&gt;
+     *
+     * @return A map of clients to their debit values.
+     */
+    @Override
+    public Map&lt;Client, BigDecimal&gt; getClientsAndDebit() {
+<span class="fc" id="L188">        return orderRepository.getClientAndDebit()</span>
+<span class="fc" id="L189">                .stream()</span>
+<span class="fc" id="L190">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L191">                        view -&gt; new Client(</span>
+<span class="fc" id="L192">                                view.getId(), view.getName(), view.getSurname(), view.getAge(), view.getCash()</span>
+                        ),
+                        ClientAndDebitDto::getDebit
+                ));
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResponseDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.controller.dto</a> &gt; <span class="el_source">ResponseDto.java</span></div><h1>ResponseDto.java</h1><pre class="source lang-java linenums">package com.app.controller.dto;
+
+/**
+ * A generic DTO representing a response with either data or an error message.
+ * &lt;p&gt;
+ * This class can hold a response with a generic type for data or an error message, but not both at the same time.
+ * It provides constructors to initialize the response with either data or an error.
+ * &lt;/p&gt;
+ *
+ *
+ */
+<span class="fc" id="L12">public record ResponseDto&lt;T&gt;(</span>
+        /**
+         * The data to be included in the response, can be of any type.
+         */
+        T data,
+
+        /**
+         * The error message to be included in the response, if any.
+         */
+        String error) {
+
+    /**
+     * Constructor to create a response with data and no error message.
+     * &lt;p&gt;
+     * Initializes the {@code error} field as {@code null}.
+     * &lt;/p&gt;
+     *
+     * @param data the data to be included in the response.
+     */
+    public ResponseDto(T data) {
+<span class="fc" id="L32">        this(data, null);</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * Constructor to create a response with an error message and no data.
+     * &lt;p&gt;
+     * Initializes the {@code data} field as {@code null}.
+     * &lt;/p&gt;
+     *
+     * @param error the error message to be included in the response.
+     */
+    public ResponseDto(String error) {
+<span class="fc" id="L44">        this(null, error);</span>
+<span class="fc" id="L45">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

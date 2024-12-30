@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ShopApplication - spring boot</a> &gt; <a href="index.source.html" class="el_package">com.app.security.filter</a> &gt; <span class="el_source">AppAuthenticationFilter.java</span></div><h1>AppAuthenticationFilter.java</h1><pre class="source lang-java linenums">package com.app.security.filter;
+
+import com.app.security.dto.AuthenticationDto;
+import com.app.security.service.TokenService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
+import java.util.Collections;
+
+/**
+ * Custom filter to handle user authentication during login.
+ * &lt;p&gt;
+ * This filter processes the login request, extracts user credentials (username and password),
+ * authenticates the user using the provided {@link AuthenticationManager}, and generates
+ * authentication tokens upon successful login. It also sets the generated tokens in cookies
+ * and returns them in the response body.
+ * &lt;/p&gt;
+ */
+public class AppAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+    private final TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
+
+    /**
+     * Constructs a new {@link AppAuthenticationFilter} with the specified {@link TokenService}
+     * and {@link AuthenticationManager}.
+     *
+     * @param tokenService          the service responsible for generating tokens
+     * @param authenticationManager the authentication manager used to authenticate the user
+     */
+<span class="fc" id="L43">    public AppAuthenticationFilter(TokenService tokenService, AuthenticationManager authenticationManager) {</span>
+<span class="fc" id="L44">        this.tokenService = tokenService;</span>
+<span class="fc" id="L45">        this.authenticationManager = authenticationManager;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Attempts to authenticate the user based on the provided credentials.
+     * &lt;p&gt;
+     * The method reads the {@link AuthenticationDto} from the request body, which contains
+     * the username and password. It then creates a {@link UsernamePasswordAuthenticationToken}
+     * and delegates the authentication to the {@link AuthenticationManager}.
+     * &lt;/p&gt;
+     *
+     * @param request  the HTTP request containing the user's credentials
+     * @param response the HTTP response
+     * @return the authenticated {@link Authentication} object
+     * @throws AuthenticationException if authentication fails
+     */
+    @Override
+<span class="nc" id="L62">    @SneakyThrows</span>
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
+<span class="fc" id="L65">        var jsonBody = new ObjectMapper()</span>
+<span class="fc" id="L66">                .readValue(request.getInputStream(), AuthenticationDto.class);</span>
+
+<span class="fc" id="L68">        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(</span>
+<span class="fc" id="L69">                jsonBody.username(),</span>
+<span class="fc" id="L70">                jsonBody.password(),</span>
+<span class="fc" id="L71">                Collections.emptyList()</span>
+        ));
+    }
+
+    /**
+     * Handles successful authentication by generating and setting authentication tokens.
+     * &lt;p&gt;
+     * Upon successful authentication, this method generates the access and refresh tokens
+     * using the {@link TokenService}. The tokens are then added as HTTP-only cookies and
+     * returned in the response body in JSON format.
+     * &lt;/p&gt;
+     *
+     * @param request    the HTTP request
+     * @param response   the HTTP response
+     * @param chain      the filter chain
+     * @param authResult the authentication result
+     * @throws IOException      if an I/O error occurs
+     * @throws ServletException if a servlet exception occurs
+     */
+    @Override
+    protected void successfulAuthentication(
+            HttpServletRequest request, HttpServletResponse response,
+            FilterChain chain, Authentication authResult) throws IOException, ServletException {
+
+<span class="fc" id="L95">        var tokens = tokenService.generateToken(authResult);</span>
+
+<span class="fc" id="L97">        var accesTokenCookie = new Cookie(&quot;AccessToken&quot;, tokens.accessToken());</span>
+<span class="fc" id="L98">        accesTokenCookie.setHttpOnly(true);</span>
+<span class="fc" id="L99">        accesTokenCookie.setMaxAge(86400); // 1 day</span>
+<span class="fc" id="L100">        var refreshTokenCookie = new Cookie(&quot;RefreshToken&quot;, tokens.refreshToken());</span>
+<span class="fc" id="L101">        refreshTokenCookie.setHttpOnly(true);</span>
+<span class="fc" id="L102">        refreshTokenCookie.setMaxAge(86400); // 1 day</span>
+
+<span class="fc" id="L104">        response.addCookie(accesTokenCookie);</span>
+<span class="fc" id="L105">        response.addCookie(refreshTokenCookie);</span>
+<span class="fc" id="L106">        response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span>
+<span class="fc" id="L107">        response.getWriter().write(new ObjectMapper().writeValueAsString(tokens));</span>
+<span class="fc" id="L108">        response.getWriter().flush();</span>
+<span class="fc" id="L109">        response.getWriter().close();</span>
+<span class="fc" id="L110">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
